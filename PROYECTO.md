@@ -20,19 +20,21 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 
 ## Infraestructura del cliente (Kike)
 - Dominio propio: **kreadigitalstudio.es**. Los subdominios se crean en el proveedor del dominio.
-- Tiene contratado **Opcloud** (cuota anual): permite crear muchos subdominios. *(Confirmar el nombre exacto del proveedor.)*
-- Tiene además activa la **modalidad "hostgate"** de alojamiento. *(Confirmar qué incluye: FTP, PHP, correo…)*
+- **OVHcloud** (cuota anual): proveedor del dominio y del DNS; permite crear muchos subdominios.
+- **HostGator**: plan de alojamiento activo (plan B para alojar archivos y correo).
 - Krea Velvet ya funciona así: GitHub Pages + `velvet.kreadigitalstudio.es`.
 
 ### Plan de publicación recomendado
 1. **GitHub Pages** aloja web y app (gratis, HTTPS automático y se publica con cada `git push` desde Code).
-2. En **Opcloud** se crea el registro DNS: `CNAME  aire  →  kikeotero7.github.io`.
-3. El alojamiento de Opcloud/hostgate queda como **plan B** (subir los archivos por FTP) y para el correo `hola@kreadigitalstudio.es`.
+2. En **OVHcloud** se crea el registro DNS: Web Cloud → Nombres de dominio → kreadigitalstudio.es →
+   pestaña **Zona DNS** → **Añadir un registro** → **CNAME** → subdominio `aire`, destino `kikeotero7.github.io.` (con punto final).
+   La propagación suele tardar de minutos a unas horas (máximo 24 h).
+3. El alojamiento de **HostGator** queda como **plan B** (subir los archivos por FTP) y para el correo `hola@kreadigitalstudio.es`.
 
 ## Pendiente
 - [ ] Kike crea el repositorio vacío `aire` en GitHub (público) y da acceso a Claude.
 - [ ] Subir el proyecto, activar GitHub Pages con dominio `aire.kreadigitalstudio.es`.
-- [ ] Crear el CNAME en Opcloud y activar "Enforce HTTPS" en GitHub Pages.
+- [ ] Crear el CNAME en OVHcloud y activar "Enforce HTTPS" en GitHub Pages.
 - [ ] Rellenar los datos del titular en `legal.html` (marcados en amarillo: nombre/razón social, NIF, dirección, email).
 - [ ] Revisión de los textos legales por la gestoría.
 - [ ] Lemon Squeezy: tienda, producto Aire Pro 9,99 €, licencias (3 activaciones), descuento LANZAMIENTO.
