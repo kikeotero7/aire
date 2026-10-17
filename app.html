@@ -212,13 +212,20 @@ nav.tabs button.tab-sos[aria-current="page"]{background:var(--sos-soft)}
 'use strict';
 // ===== Configuración de negocio =====
 const CONFIG = {
-  priceLabel: '6 USD',
+  price: 9.99,             // precio normal, pago único
+  launchPrice: 6.99,       // precio de lanzamiento
+  launchEnds: '2026-11-30T23:59:59+01:00', // fin del lanzamiento (hora de Madrid)
+  launchCode: 'LANZAMIENTO', // descuento de 3 € en Lemon Squeezy que caduca la misma fecha
   checkoutUrl: '',         // Enlace de compra de Lemon Squeezy: https://TU-TIENDA.lemonsqueezy.com/buy/XXXX
   apiBase: '',             // URL del servidor de licencias: https://aire-licencias.TU-CUENTA.workers.dev
   demoCode: 'AIRE-DEMO',   // Solo funciona mientras checkoutUrl/apiBase estén vacíos (vista previa)
   minPerCig: 11            // minutos de vida estimados por cigarrillo (Shaw et al., BMJ 2000)
 };
 const LIVE = !!(CONFIG.checkoutUrl && CONFIG.apiBase);
+const isLaunch = () => Date.now() < new Date(CONFIG.launchEnds).getTime();
+const eur = v => v.toLocaleString('es-ES', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+const priceNow = () => eur(isLaunch() ? CONFIG.launchPrice : CONFIG.price);
+const launchDate = () => new Date(CONFIG.launchEnds).toLocaleDateString('es-ES', {day:'numeric', month:'long', timeZone:'Europe/Madrid'});
 const KEY = 'aire.v1';
 const H = 3600e3, D = 24 * H;
 
@@ -228,7 +235,7 @@ function demoState(){
   const at = (d, h) => new Date(now - d * D - h * H).toISOString();
   return {
     demo:true, pro:false, theme:null,
-    profile:{ name:'Laura', quitAt: at(9, 4.2), perDay:15, perPack:20, packPrice:8, currency:'USD', years:12 },
+    profile:{ name:'Laura', quitAt: at(9, 4.2), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:12 },
     goal:{ name:'Escapada de fin de semana', price:250 },
     log:[
       {t:at(0,3), kind:'craving', trigger:'Café', ok:true},
@@ -582,7 +589,7 @@ function newClaim(){
 function checkoutHref(){
   if (!S.claim) { S.claim = newClaim(); save(); }
   const u = CONFIG.checkoutUrl + (CONFIG.checkoutUrl.includes('?') ? '&' : '?');
-  return u + encodeURIComponent('checkout[custom][claim]') + '=' + S.claim + '&' + encodeURIComponent('checkout[custom][app]') + '=aire';
+  return u + encodeURIComponent('checkout[custom][claim]') + '=' + S.claim + '&' + encodeURIComponent('checkout[custom][app]') + '=aire' + (isLaunch() && CONFIG.launchCode ? '&' + encodeURIComponent('checkout[discount_code]') + '=' + encodeURIComponent(CONFIG.launchCode) : '');
 }
 async function api(path, body){
   const res = await fetch(CONFIG.apiBase + path, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {});
@@ -619,13 +626,14 @@ async function revalidate(){
 }
 function paywall(why){
   const pay = LIVE
-    ? `<a class="btn btn-primary btn-block" data-pay href="${esc(checkoutHref())}" target="_blank" rel="noopener" style="text-decoration:none">Desbloquear por ${CONFIG.priceLabel}</a>`
-    : `<button class="btn btn-primary btn-block" data-pay>Desbloquear por ${CONFIG.priceLabel}</button>`;
+    ? `<a class="btn btn-primary btn-block" data-pay href="${esc(checkoutHref())}" target="_blank" rel="noopener" style="text-decoration:none">Desbloquear por ${priceNow()}</a>`
+    : `<button class="btn btn-primary btn-block" data-pay>Desbloquear por ${priceNow()}</button>`;
   const pending = LIVE && S.pendingAt ? `<p class="small" style="margin:10px 0 0; color:var(--accent)"><b>Esperando la confirmación del pago…</b> Se activa solo en cuanto se complete.</p>` : '';
   return `<div class="card paywall">
     <span class="label" style="color:var(--accent)">Aire Pro</span>
     <h3 style="margin-top:6px">${why}</h3>
-    <div class="price" style="margin-top:10px">${CONFIG.priceLabel.replace(' USD', '')}<small> USD · pago único, para siempre</small></div>
+    <div class="price" style="margin-top:10px">${priceNow()}<small> · pago único, para siempre</small></div>
+    ${isLaunch() ? `<p class="small" style="margin:4px 0 0"><b>Precio de lanzamiento hasta el ${launchDate()}.</b> Después, ${eur(CONFIG.price)}.</p>` : ''}
     <ul class="checks"><li>Los 10 hitos de salud, hasta los 15 años</li><li>Diario con detonantes y horas críticas</li><li>Meta de ahorro con cuenta atrás</li><li>9 logros para celebrar cada avance</li><li>Sin suscripciones ni anuncios</li></ul>
     ${pay}${pending}
     <div class="code-row"><input id="codeIn" placeholder="${LIVE ? 'Pega tu licencia del email' : '¿Tienes un código?'}" aria-label="Licencia o código de desbloqueo" autocomplete="off" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" data-code>Activar</button></div>
@@ -648,9 +656,9 @@ function bindPaywall(root){
 
 // ===== Perfil y ajustes =====
 function openProfile(fromDemo){
-  const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:6, currency:'USD', years:5} : S.profile;
+  const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:5} : S.profile;
   const dt = new Date(new Date(p.quitAt).getTime() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
-  const cur = ['USD','EUR','MXN','COP','ARS','CLP','PEN','GBP'];
+  const cur = ['EUR','USD','MXN','COP','ARS','CLP','PEN','GBP'];
   sheet(`<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
     <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
     <form id="pf" style="display:flex; flex-direction:column; gap:12px">

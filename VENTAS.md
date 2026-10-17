@@ -7,7 +7,7 @@ Anuncio / TikTok ──► Página de venta (aire.kreadigitalstudio.es)
                           │  "Empezar gratis"
                           ▼
                      App gratis (/app) ── el usuario la usa y se engancha
-                          │  "Desbloquear por 6 USD"
+                          │  "Desbloquear Aire Pro" (9,99 €; 6,99 € en lanzamiento)
                           ▼
                 Checkout de Lemon Squeezy (cobra, factura e IVA)
                           │  webhook firmado
@@ -21,17 +21,18 @@ Nadie tiene que hacer nada a mano. Lemon Squeezy además envía la licencia por 
 para que el cliente la active en otro móvil, y si hay reembolso la app la desactiva sola en la siguiente validación semanal.
 
 **Por qué Lemon Squeezy:** es *Merchant of Record*. Cobra el IVA de cada país y lo declara por ti,
-algo obligatorio cuando vendes desde España a clientes de la UE. Comisión: 5 % + 0,50 USD por venta
-→ de cada venta de 6 USD te quedan unos **5,20 USD**.
+algo obligatorio cuando vendes desde España a clientes de la UE. Comisión: 5 % + 0,50 € por venta
+→ de cada venta te quedan unos **6,15 €** (a 6,99 € de lanzamiento) o **9 €** (a 9,99 €).
 
 ## Puesta en marcha (unos 30 minutos)
 
 ### 1. Lemon Squeezy
 1. Crea la tienda en lemonsqueezy.com y activa los pagos (datos fiscales y cuenta bancaria).
-2. Crea el producto **Aire Pro** · precio 6 USD · pago único.
+2. Crea el producto **Aire Pro** · precio 9,99 € · pago único.
 3. En el producto activa **License keys** (límite de activaciones: 3, sin caducidad).
-4. Copia el **enlace de compra** (`https://TU-TIENDA.lemonsqueezy.com/buy/...`).
-5. Apunta el **Store ID** (Settings → Stores) y el **Product ID** (en la URL del producto).
+4. Crea el descuento **LANZAMIENTO**: 3 € de descuento, solo para Aire Pro, con fecha de fin 30/11/2026. La app lo añade sola al enlace de compra hasta esa fecha, y después cobra 9,99 € sin que toques nada (si cambias la fecha, cámbiala también en `launchEnds` de la app y en `LAUNCH_ENDS` de la página de venta).
+5. Copia el **enlace de compra** (`https://TU-TIENDA.lemonsqueezy.com/buy/...`).
+6. Apunta el **Store ID** (Settings → Stores) y el **Product ID** (en la URL del producto).
 
 ### 2. Servidor de licencias (Cloudflare, plan gratis)
 ```bash
@@ -71,14 +72,14 @@ y comprueba que la app se desbloquea sola y te llega el aviso de Telegram.
 
 ## Números
 
-| Ventas al mes | Ingreso neto aprox. |
+| Ventas al mes | Ingreso neto aprox. a 9,99 € |
 |---|---|
-| 50  | 260 USD |
-| 100 | 520 USD |
-| 200 | 1.040 USD |
-| 500 | 2.600 USD |
+| 50  | 450 € |
+| 100 | 900 € |
+| 200 | 1.800 € |
+| 500 | 4.500 € |
 
-Regla clave con publicidad: si conseguir cada comprador te cuesta más de ~5 USD, pierdes dinero.
+Regla clave con publicidad: si conseguir cada comprador te cuesta más de ~6 € (en lanzamiento) o ~9 € (después), pierdes dinero.
 Prioriza contenido orgánico (vídeos cortos con la calculadora de ahorro y el contador) y usa anuncios
 solo cuando sepas qué porcentaje de usuarios gratis acaba pagando.
 

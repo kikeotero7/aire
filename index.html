@@ -7,7 +7,7 @@
 <link rel="icon" href="app/icon.svg" type="image/svg+xml">
 <title>Aire · Deja de fumar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Aire es la app para dejar de fumar: contador en vivo, dinero ahorrado, hitos de salud y un botón SOS para superar cada antojo. Gratis para empezar, Pro por 6 USD una sola vez.">
+<meta name="description" content="Aire es la app para dejar de fumar: contador en vivo, dinero ahorrado, hitos de salud y un botón SOS para superar cada antojo. Gratis para empezar, Pro con un pago único.">
 <meta property="og:title" content="Aire · Deja de fumar">
 <meta property="og:description" content="Cuenta cada hora sin fumar, mira tu ahorro crecer y supera los antojos en 3 minutos.">
 <meta name="theme-color" content="#0E7C66">
@@ -173,12 +173,12 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
     <h1>Tu último cigarrillo puede ser <em>el de hoy</em>.</h1>
     <p class="lead">Aire cuenta cada hora que pasas sin fumar, te enseña el dinero que recuperas y te acompaña en los 3 minutos que dura un antojo. Sin parches, sin sermones.</p>
     <div class="btns"><a class="btn btn-primary" href="app/">Empezar gratis</a><a class="btn btn-ghost" href="#calculadora">¿Cuánto ahorrarías?</a></div>
-    <div class="trust"><span>Sin registro</span><span>Funciona sin internet</span><span>Pro: 6 USD una sola vez</span></div>
+    <div class="trust"><span>Sin registro</span><span>Funciona sin internet</span><span>Pro: <span class="p-now">6,99 €</span> una sola vez</span></div>
   </div>
   <div class="phone" aria-label="Vista de la app Aire">
     <div class="screen">
       <div class="scr-hero"><small>Llevas sin fumar</small><b><span id="dDays">9</span> días</b><span class="num" id="dHms">04 h 12 min 00 s</span></div>
-      <div class="scr-stats"><div><b class="num">$55</b><span>ahorrado</span></div><div><b class="num">138</b><span>cigarrillos evitados</span></div><div><b class="num">1,1 d</b><span>de vida</span></div></div>
+      <div class="scr-stats"><div><b class="num">38 €</b><span>ahorrado</span></div><div><b class="num">138</b><span>cigarrillos evitados</span></div><div><b class="num">1,1 d</b><span>de vida</span></div></div>
       <div class="scr-sos">Tengo ganas de fumar<small>3 minutos de respiración guiada</small></div>
       <div class="scr-ms"><span class="muted">Próximo hito · en 5 días</span><b>Mejor circulación</b><div class="scr-bar"><i></i></div></div>
     </div>
@@ -192,15 +192,15 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
     <p class="lead">Mueve los controles con tus datos reales. Aire hace esta cuenta por ti cada segundo desde el día que lo dejas.</p>
     <div class="controls">
       <div class="ctl"><label for="cDay">Cigarrillos al día <output id="oDay" class="num">15</output></label><input type="range" id="cDay" min="1" max="40" value="15"></div>
-      <div class="ctl"><label for="cPrice">Precio del paquete <output id="oPrice" class="num">$8</output></label><input type="range" id="cPrice" min="1" max="20" step="0.5" value="8"></div>
-      <div class="ctl"><label for="cCur">Moneda <select id="cCur"><option>USD</option><option>EUR</option><option>MXN</option><option>COP</option><option>GBP</option></select></label></div>
+      <div class="ctl"><label for="cPrice">Precio del paquete <output id="oPrice" class="num">5,50 €</output></label><input type="range" id="cPrice" min="1" max="20" step="0.25" value="5.5"></div>
+      <div class="ctl"><label for="cCur">Moneda <select id="cCur"><option>EUR</option><option>USD</option><option>MXN</option><option>COP</option><option>GBP</option></select></label></div>
     </div>
   </div>
   <div class="result" aria-live="polite">
     <span class="eyebrow">En un año ahorrarías</span>
-    <span class="big num" id="rYear">$2.190</span>
+    <span class="big num" id="rYear">1.506 €</span>
     <div class="result-grid">
-      <div><b class="num" id="rMonth">$180</b><span>al mes</span></div>
+      <div><b class="num" id="rMonth">124 €</b><span>al mes</span></div>
       <div><b class="num" id="rCigs">5.475</b><span>cigarrillos al año</span></div>
       <div><b class="num" id="rLife">42 días</b><span>de vida recuperados*</span></div>
     </div>
@@ -237,12 +237,13 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
 
 <section class="pricing" id="precio" style="padding-top:0"><div class="wrap">
   <span class="eyebrow">Precio</span>
-  <h2 style="margin-top:10px">Cuesta menos que un paquete.</h2>
+  <h2 style="margin-top:10px">Cuesta menos que dos paquetes.</h2>
   <div class="plans">
     <div class="plan"><h3>Gratis</h3><div class="price">0<small> para siempre</small></div>
       <ul><li>Contador en vivo</li><li>Dinero y cigarrillos ahorrados</li><li>Botón SOS ilimitado</li><li>4 primeros hitos de salud</li></ul>
       <a class="btn btn-ghost" href="app/">Empezar gratis</a></div>
-    <div class="plan pro"><h3>Aire Pro</h3><div class="price">$6<small> USD · pago único</small></div>
+    <div class="plan pro"><h3>Aire Pro</h3><div class="price"><span class="p-now">6,99 €</span><small> · pago único</small></div>
+      <p class="launch-note" style="margin:0; font-size:.92rem"><b>Precio de lanzamiento hasta el <span class="p-date">30 de noviembre</span>.</b> Después, 9,99 €.</p>
       <ul><li>Todo lo de Gratis</li><li>Los 10 hitos de salud</li><li>Diario con detonantes y horas críticas</li><li>Meta de ahorro y 9 logros</li><li>Sin suscripción ni anuncios</li></ul>
       <a class="btn btn-primary" href="app/#salud">Conseguir Pro</a></div>
   </div>
@@ -253,7 +254,7 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
   <h2 style="margin-top:10px">Antes de empezar</h2>
   <div class="faq-list">
     <details><summary>¿Tengo que descargar algo de una tienda?</summary><p>No. Aire se abre en el navegador y se instala en tu pantalla de inicio con "Añadir a pantalla de inicio". Después funciona aunque no tengas conexión.</p></details>
-    <details><summary>¿Es una suscripción?</summary><p>No. Pagas 6 USD una vez y Aire Pro es tuyo para siempre. Recibes una licencia por email para activarlo también en otro móvil.</p></details>
+    <details><summary>¿Es una suscripción?</summary><p>No. Pagas <span class="p-now">6,99 €</span> una vez y Aire Pro es tuyo para siempre. Recibes una licencia por email para activarlo también en otro móvil.</p></details>
     <details><summary>¿Mis datos están seguros?</summary><p>Tus datos de consumo, tu diario y tu meta se guardan solo en tu teléfono. No hace falta crear una cuenta.</p></details>
     <details><summary>¿Y si vuelvo a fumar?</summary><p>Lo apuntas y decides: seguir con tu contador o empezar uno nuevo. Un desliz no borra lo que has conseguido.</p></details>
     <details><summary>¿Sustituye a un tratamiento?</summary><p>No. Aire te ayuda con la motivación y los antojos. Si fumas mucho o tienes ansiedad intensa, habla con tu médico: hay tratamientos que aumentan mucho las probabilidades de éxito y Aire los complementa.</p></details>
@@ -272,6 +273,14 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
 <script>
 (() => {
   const $ = s => document.querySelector(s);
+  // Precio: 9,99 € pago único; 6,99 € de lanzamiento hasta LAUNCH_ENDS (mismo valor que en la app)
+  const PRICE = 9.99, LAUNCH = 6.99, LAUNCH_ENDS = '2026-11-30T23:59:59+01:00';
+  const launch = Date.now() < new Date(LAUNCH_ENDS).getTime();
+  const P = launch ? LAUNCH : PRICE;
+  const PS = P.toLocaleString('es-ES', {minimumFractionDigits:2}) + ' €';
+  document.querySelectorAll('.p-now').forEach(el => el.textContent = PS);
+  document.querySelectorAll('.p-date').forEach(el => el.textContent = new Date(LAUNCH_ENDS).toLocaleDateString('es-ES', {day:'numeric', month:'long', timeZone:'Europe/Madrid'}));
+  document.querySelectorAll('.launch-note').forEach(el => el.hidden = !launch);
   const start = Date.now() - (9 * 864e5 + 4.2 * 36e5);
   const pad = n => String(n).padStart(2, '0');
   const tick = () => {
@@ -291,10 +300,10 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
     $('#rMonth').textContent = fmt(perDay * 30, cur);
     $('#rCigs').textContent = new Intl.NumberFormat('es').format(day * 365);
     $('#rLife').textContent = Math.round(day * 365 * 11 / 1440) + ' días';
-    const hours = cur === 'USD' ? 6 / perDay * 24 : null;
+    const hours = cur === 'EUR' ? P / perDay * 24 : null;
     $('#rRoi').textContent = hours !== null
-      ? (hours < 24 ? `Aire Pro (6 USD) se paga solo en ${Math.max(1, Math.round(hours))} horas sin fumar.` : `Aire Pro (6 USD) se paga solo en ${Math.ceil(hours / 24)} días sin fumar.`)
-      : 'Aire Pro cuesta 6 USD una sola vez: menos que un paquete de tabaco.';
+      ? (hours < 24 ? `Aire Pro (${PS}) se paga solo en ${Math.max(1, Math.round(hours))} horas sin fumar.` : `Aire Pro (${PS}) se paga solo en ${Math.ceil(hours / 24)} días sin fumar.`)
+      : `Aire Pro cuesta ${PS} una sola vez: menos que dos paquetes de tabaco.`;
   };
   ['#cDay', '#cPrice', '#cCur'].forEach(s => $(s).addEventListener('input', calc));
   calc();
