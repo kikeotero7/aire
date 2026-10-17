@@ -49,7 +49,7 @@ async function webhook(req, env) {
     if (c) await env.LICENSES.put(`claim:${c}`, JSON.stringify({ order: String(body.data.id) }), { expirationTtl: CLAIM_TTL });
     const key = await env.LICENSES.get(`order:${body.data.id}`);
     if (c && key) await env.LICENSES.put(`claim:${c}`, JSON.stringify({ order: String(body.data.id), key }), { expirationTtl: CLAIM_TTL });
-    await notify(env, `💰 Nueva venta de Aire Pro\n${a.total_formatted || ''} · ${a.user_email || ''}`);
+    await notify(env, `💰 Nueva venta de Aire Pro · ${a.total_formatted || ''} · pedido ${body.data.id}`); // sin datos personales del cliente
   }
 
   if (event === 'license_key_created') {

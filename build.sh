@@ -14,4 +14,6 @@ wrap() { # $1 fuente, $2 destino, $3 etiquetas extra en <head>
 }
 wrap app.html app/index.html '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.svg"><meta name="apple-mobile-web-app-capable" content="yes">'
 wrap landing.html index.html '<link rel="icon" href="app/icon.svg" type="image/svg+xml">'
-echo "Listo: index.html y app/index.html"
+mkdir -p legal
+wrap legal.html legal/index.html '<link rel="icon" href="../app/icon.svg" type="image/svg+xml">'
+echo "Listo: index.html, app/index.html y legal/index.html"

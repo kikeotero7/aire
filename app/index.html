@@ -647,6 +647,7 @@ function paywall(why){
     ${pay}${pending}
     <div class="code-row"><input id="codeIn" placeholder="${LIVE ? 'Pega tu licencia del email' : '¿Tienes un código?'}" aria-label="Licencia o código de desbloqueo" autocomplete="off" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" data-code>Activar</button></div>
     <p class="small muted" style="margin:10px 0 0">${LIVE ? 'Pago seguro con Lemon Squeezy. Recibes tu licencia por email para usarla también en otro móvil.' : `Vista previa: usa el código <b class="num">${CONFIG.demoCode}</b>`}</p>
+    <p class="small muted" style="margin:8px 0 0">Al comprar aceptas las <a href="../legal/#condiciones" target="_blank" rel="noopener">condiciones de venta</a> y que Aire Pro se active al momento. Tienes 14 días de garantía de devolución.</p>
   </div>`;
 }
 function bindPaywall(root){
@@ -700,7 +701,7 @@ function openSettings(){
     <button class="btn btn-ghost btn-block" id="stReset" style="color:var(--sos); border-color:var(--sos)">Borrar todos mis datos</button>
     <div id="stConfirm"></div>
     <button class="btn btn-primary btn-block" data-close>Cerrar</button>
-    <p class="foot-note">Aire · una app de KREA Digital Studio</p>`);
+    <p class="foot-note">Aire · una app de KREA Digital Studio<br><a href="../legal/#aviso" target="_blank" rel="noopener">Aviso legal</a> · <a href="../legal/#privacidad" target="_blank" rel="noopener">Privacidad</a> · <a href="../legal/#condiciones" target="_blank" rel="noopener">Condiciones</a></p>`);
   $('#stProfile').onclick = () => { closeSheet(); openProfile(S.demo); };
   $('#stTheme').onclick = () => { cycleTheme(); openSettings(); };
   $('#stReset').onclick = () => {
