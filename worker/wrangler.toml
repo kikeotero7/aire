@@ -1,0 +1,15 @@
+name = "aire-licencias"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+# Crea el almacén con: npx wrangler kv namespace create LICENSES
+# y pega aquí el id que te devuelve.
+[[kv_namespaces]]
+binding = "LICENSES"
+id = "PEGA_AQUI_EL_ID_DEL_KV"
+
+[vars]
+ALLOWED_ORIGIN = "https://aire.kreadigitalstudio.es"
+
+# Ruta en tu dominio (opcional; si no, usa la URL *.workers.dev)
+# routes = [{ pattern = "api-aire.kreadigitalstudio.es", custom_domain = true }]

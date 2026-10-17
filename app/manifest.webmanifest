@@ -1,0 +1,14 @@
+{
+  "name": "Aire · Deja de fumar",
+  "short_name": "Aire",
+  "description": "Contador sin fumar, ahorro, hitos de salud y SOS para los antojos.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EAF0ED",
+  "theme_color": "#0E7C66",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

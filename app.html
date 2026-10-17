@@ -1,0 +1,718 @@
+<title>Aire · Deja de fumar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Aire: la app para dejar de fumar. Contador en vivo, dinero ahorrado, hitos de salud, botón SOS para antojos y diario de progreso.">
+<meta name="theme-color" content="#0E7C66">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: columna de app móvil (máx. 480px) con cabecera, vistas por pestañas y barra inferior fija; el pulmón/respiración es el motivo visual */
+:root{
+  --bg:#EAF0ED; --surface:#F8FBF9; --surface-2:#DFE8E4; --ink:#0F201B; --muted:#53655F; --line:#CCD9D3;
+  --accent:#0E7C66; --accent-soft:#C9E7DD; --on-accent:#FFFFFF;
+  --sos:#D9472F; --sos-soft:#F8D9D1; --on-sos:#FFFFFF;
+  --gold:#A87F12; --gold-soft:#F1E3B8;
+  --display:'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --body:'Figtree', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --mono:'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
+  --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
+  --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
+  --gold:#E6C25A; --gold-soft:#3A2F10; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
+  --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
+  --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
+  --gold:#E6C25A; --gold-soft:#3A2F10; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; margin:0}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--bg)}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display); margin:0; line-height:1.05; text-wrap:balance; letter-spacing:-.02em}
+.label{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600}
+
+.app{max-width:480px; margin:0 auto; min-height:100%; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); display:flex; align-items:center; justify-content:space-between; padding-block:14px 10px}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:1.35rem; letter-spacing:-.03em}
+.brand svg{width:30px; height:30px}
+.top-actions{display:flex; gap:8px; align-items:center}
+.icon-btn{width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center}
+.icon-btn svg{width:20px; height:20px}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:.74rem; font-weight:700; letter-spacing:.04em}
+.pill-demo{background:var(--gold-soft); color:var(--gold)}
+.pill-pro{background:var(--accent-soft); color:var(--accent)}
+
+.view{display:flex; flex-direction:column; gap:14px; padding-top:6px; animation:fade .35s ease}
+@keyframes fade{from{opacity:.4; transform:translateY(6px)} to{opacity:1; transform:none}}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px}
+
+/* Contador principal */
+.hero{position:relative; overflow:hidden; background:var(--accent); color:var(--on-accent); border:0; padding:22px 20px 20px}
+.hero .label{color:inherit; opacity:.8}
+.hero canvas{position:absolute; inset:0; width:100%; height:100%; opacity:.35; pointer-events:none}
+.hero-inner{position:relative; display:flex; flex-direction:column; gap:10px}
+.clock{display:flex; align-items:baseline; gap:4px 14px; flex-wrap:wrap}
+.clock .big{font-family:var(--display); font-weight:800; font-size:clamp(4rem, 22vw, 6.2rem); line-height:.85; letter-spacing:-.05em}
+.clock .unit{font-family:var(--display); font-weight:600; font-size:1.4rem}
+.clock-sub{font-family:var(--mono); font-size:1.05rem; letter-spacing:.02em; opacity:.92}
+.hero-foot{font-size:.9rem; opacity:.9}
+
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
+.stat{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 12px; min-width:0; display:flex; flex-direction:column; gap:4px}
+.stat b{font-family:var(--display); font-size:1.35rem; font-weight:700; letter-spacing:-.02em; overflow-wrap:anywhere}
+.stat span{font-size:.76rem; color:var(--muted); line-height:1.25}
+
+.sos-btn{display:flex; align-items:center; gap:14px; width:100%; text-align:left; background:var(--sos); color:var(--on-sos); border:0; border-radius:var(--r); padding:18px 20px; box-shadow:0 10px 30px -12px color-mix(in srgb, var(--sos) 70%, transparent)}
+.sos-btn .ring{flex:none; width:46px; height:46px; border-radius:50%; border:2px solid currentColor; display:grid; place-items:center; font-family:var(--display); font-weight:800; animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)} 50%{transform:scale(1.09)}}
+.sos-btn strong{display:block; font-family:var(--display); font-size:1.2rem}
+.sos-btn small{opacity:.9}
+
+.next h3{font-size:1.15rem; margin-top:4px}
+.bar{height:10px; border-radius:99px; background:var(--surface-2); overflow:hidden}
+.bar > i{display:block; height:100%; background:var(--accent); border-radius:inherit; transition:width .6s ease}
+.row{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+
+/* Hitos */
+.timeline{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.ms{display:grid; grid-template-columns:28px minmax(0,1fr); gap:12px; padding-bottom:18px; position:relative}
+.ms::before{content:""; position:absolute; left:13px; top:28px; bottom:0; width:2px; background:var(--line)}
+.ms:last-child::before{display:none}
+.dot{width:28px; height:28px; border-radius:50%; border:2px solid var(--line); background:var(--surface); display:grid; place-items:center}
+.ms.done .dot{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.ms.now .dot{border-color:var(--accent)}
+.dot svg{width:14px; height:14px}
+.ms h4{margin:2px 0 2px; font-size:1rem; font-weight:700}
+.ms .when{font-family:var(--mono); font-size:.78rem; color:var(--accent); font-weight:500}
+.ms p{margin:0 0 8px; color:var(--muted); font-size:.92rem}
+.ms.locked{filter:blur(3px); opacity:.6; user-select:none}
+
+/* SOS */
+.breath{display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 18px}
+.lung{position:relative; width:min(72vw, 260px); aspect-ratio:1; max-width:100%; display:grid; place-items:center}
+.lung .halo{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)}
+.lung .core{width:58%; aspect-ratio:1; border-radius:50%; background:var(--accent); transform:scale(.6); transition:transform 4s cubic-bezier(.45,0,.3,1); display:grid; place-items:center; color:var(--on-accent); font-family:var(--display); font-weight:700; font-size:1.1rem; text-align:center; padding:10px}
+.phase{font-family:var(--display); font-size:1.6rem; font-weight:700}
+.countdown{font-family:var(--mono); font-size:2.4rem; letter-spacing:.02em}
+.tip{background:var(--surface-2); border-radius:14px; padding:12px 14px; font-size:.95rem; text-align:center; min-height:3.2em; display:grid; place-items:center}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 20px; border-radius:14px; border:1px solid transparent; font-weight:700; font-size:.95rem}
+.btn-primary{background:var(--accent); color:var(--on-accent)}
+.btn-ghost{background:transparent; border-color:var(--line); color:var(--ink)}
+.btn-sos{background:var(--sos); color:var(--on-sos)}
+.btn-block{width:100%}
+.btn-row{display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:8px 14px; font-size:.88rem; font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+
+/* Diario */
+.entries{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.entry{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; padding:12px 0; border-top:1px solid var(--line)}
+.entry:first-child{border-top:0}
+.tag{width:10px; height:10px; border-radius:50%; background:var(--accent)}
+.tag.slip{background:var(--sos)}
+.entry b{font-weight:600}
+.entry time{font-family:var(--mono); font-size:.78rem; color:var(--muted)}
+.hbar{display:grid; grid-template-columns:110px minmax(0,1fr) 28px; gap:10px; align-items:center; font-size:.88rem}
+.hbar .bar{height:12px}
+.hours{display:grid; grid-template-columns:repeat(24, minmax(0,1fr)); gap:2px; align-items:end; height:80px}
+.hours i{display:block; background:var(--accent); border-radius:3px 3px 0 0; min-height:2px}
+.hours-axis{display:flex; justify-content:space-between; font-family:var(--mono); font-size:.7rem; color:var(--muted)}
+
+/* Metas y logros */
+.goal{display:grid; grid-template-columns:120px minmax(0,1fr); gap:16px; align-items:center}
+.goal svg{width:120px; height:120px}
+.badges{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
+.badge{border:1px solid var(--line); border-radius:16px; padding:14px 8px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px; background:var(--surface)}
+.badge .medal{width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--surface-2); color:var(--muted); font-family:var(--display); font-weight:800}
+.badge.got .medal{background:var(--gold-soft); color:var(--gold); box-shadow:inset 0 0 0 2px var(--gold)}
+.badge small{font-size:.76rem; line-height:1.2; color:var(--muted)}
+.badge b{font-size:.84rem; line-height:1.15}
+
+/* Paywall */
+.paywall{position:relative; overflow:hidden; border:1px solid var(--accent); background:linear-gradient(160deg, var(--accent-soft), var(--surface) 70%)}
+.paywall h3{font-size:1.5rem}
+.price{font-family:var(--display); font-size:2.6rem; font-weight:800; letter-spacing:-.04em}
+.price small{font-family:var(--body); font-size:.9rem; font-weight:600; color:var(--muted); letter-spacing:0}
+.checks{list-style:none; padding:0; margin:12px 0; display:flex; flex-direction:column; gap:8px}
+.checks li{display:flex; gap:10px; align-items:flex-start}
+.checks li::before{content:""; flex:none; width:18px; height:18px; margin-top:2px; border-radius:50%; background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat}
+.code-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:10px}
+
+/* Formularios y hojas */
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-size:.85rem; font-weight:600}
+.field input,.field select{min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; width:100%}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.sheet-bg{position:fixed; inset:0; z-index:50; background:color-mix(in srgb, var(--ink) 45%, transparent); display:flex; align-items:flex-end; justify-content:center}
+.sheet{width:100%; max-width:480px; max-height:92%; overflow:auto; background:var(--bg); border-radius:24px 24px 0 0; padding:22px max(18px, env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px, env(safe-area-inset-left,0px)); display:flex; flex-direction:column; gap:14px; animation:up .3s ease}
+@keyframes up{from{transform:translateY(40px)} to{transform:none}}
+.sheet h2{font-size:1.7rem}
+.confirm{border:1px solid var(--sos); background:var(--sos-soft); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px}
+
+/* Barra inferior */
+nav.tabs{position:fixed; left:0; right:0; bottom:0; z-index:40; background:color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--line); padding:8px max(10px, env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px, env(safe-area-inset-left,0px))}
+nav.tabs .inner{max-width:480px; margin:0 auto; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:4px}
+nav.tabs button{background:none; border:0; border-radius:12px; padding:6px 2px; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:.72rem; font-weight:600; color:var(--muted)}
+nav.tabs button svg{width:22px; height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent); background:var(--accent-soft)}
+nav.tabs button.tab-sos{color:var(--sos)}
+nav.tabs button.tab-sos[aria-current="page"]{background:var(--sos-soft)}
+
+.toast{position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:12px; font-weight:600; font-size:.9rem; max-width:calc(100% - 32px)}
+.foot-note{font-size:.78rem; color:var(--muted); text-align:center; padding:8px 0}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand" aria-label="Aire">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--accent)"/><path d="M15 9v9c0 3-2 5-5 5-2 0-2-2-2-4 0-4 3-8 7-10zM17 9v9c0 3 2 5 5 5 2 0 2-2 2-4 0-4-3-8-7-10z" fill="var(--on-accent)"/></svg>
+      Aire
+    </div>
+    <div class="top-actions">
+      <span id="statusPill"></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg></button>
+      <button class="icon-btn" id="settingsBtn" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="inner">
+    <button data-tab="hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Hoy</button>
+    <button data-tab="salud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>Salud</button>
+    <button data-tab="sos" class="tab-sos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>SOS</button>
+    <button data-tab="diario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6"/></svg>Diario</button>
+    <button data-tab="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Metas</button>
+  </div>
+</nav>
+
+<div id="sheetRoot"></div>
+<div id="toastRoot" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+// ===== Configuración de negocio =====
+const CONFIG = {
+  priceLabel: '6 USD',
+  checkoutUrl: '',         // Enlace de compra de Lemon Squeezy: https://TU-TIENDA.lemonsqueezy.com/buy/XXXX
+  apiBase: '',             // URL del servidor de licencias: https://aire-licencias.TU-CUENTA.workers.dev
+  demoCode: 'AIRE-DEMO',   // Solo funciona mientras checkoutUrl/apiBase estén vacíos (vista previa)
+  minPerCig: 11            // minutos de vida estimados por cigarrillo (Shaw et al., BMJ 2000)
+};
+const LIVE = !!(CONFIG.checkoutUrl && CONFIG.apiBase);
+const KEY = 'aire.v1';
+const H = 3600e3, D = 24 * H;
+
+// ===== Estado =====
+function demoState(){
+  const now = Date.now();
+  const at = (d, h) => new Date(now - d * D - h * H).toISOString();
+  return {
+    demo:true, pro:false, theme:null,
+    profile:{ name:'Laura', quitAt: at(9, 4.2), perDay:15, perPack:20, packPrice:8, currency:'USD', years:12 },
+    goal:{ name:'Escapada de fin de semana', price:250 },
+    log:[
+      {t:at(0,3), kind:'craving', trigger:'Café', ok:true},
+      {t:at(0,9), kind:'craving', trigger:'Estrés', ok:true},
+      {t:at(1,2), kind:'craving', trigger:'Después de comer', ok:true},
+      {t:at(1,7), kind:'craving', trigger:'Estrés', ok:true},
+      {t:at(2,5), kind:'craving', trigger:'Alcohol', ok:true},
+      {t:at(3,1), kind:'craving', trigger:'Café', ok:true},
+      {t:at(3,6), kind:'craving', trigger:'Estrés', ok:true},
+      {t:at(4,4), kind:'craving', trigger:'Social', ok:true},
+      {t:at(5,8), kind:'craving', trigger:'Aburrimiento', ok:true},
+      {t:at(6,2), kind:'craving', trigger:'Café', ok:true},
+      {t:at(7,3), kind:'craving', trigger:'Estrés', ok:true},
+      {t:at(8,1), kind:'craving', trigger:'Después de comer', ok:true}
+    ]
+  };
+}
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch(e){}
+  return demoState();
+}
+let S = load();
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+// ===== Cálculos =====
+const elapsed = () => Math.max(0, Date.now() - new Date(S.profile.quitAt).getTime());
+const cigsAvoided = () => elapsed() / D * S.profile.perDay;
+const moneySaved = () => cigsAvoided() / S.profile.perPack * S.profile.packPrice;
+const money = (v, dec) => { try { return new Intl.NumberFormat('es', {style:'currency', currency:S.profile.currency, maximumFractionDigits:dec ?? (v < 100 ? 2 : 0)}).format(v); } catch(e){ return v.toFixed(2) + ' ' + S.profile.currency; } };
+const int = v => new Intl.NumberFormat('es').format(Math.floor(v));
+function lifeText(){
+  const m = cigsAvoided() * CONFIG.minPerCig;
+  if (m < 60) return Math.floor(m) + ' min';
+  if (m < 60 * 48) return (m / 60).toFixed(1).replace('.', ',') + ' h';
+  return (m / 1440).toFixed(1).replace('.', ',') + ' días';
+}
+function durText(ms){
+  const min = ms / 60e3;
+  if (min < 60) return Math.round(min) + ' min';
+  if (ms < 2 * D) return Math.round(ms / H) + ' h';
+  if (ms < 60 * D) return Math.round(ms / D) + ' días';
+  if (ms < 730 * D) return Math.round(ms / (30.44 * D)) + ' meses';
+  return Math.round(ms / (365.25 * D)) + ' años';
+}
+const pad = n => String(n).padStart(2, '0');
+
+// Hitos de salud (fuentes: OMS y CDC; valores aproximados)
+const MILESTONES = [
+  {ms:20*60e3, t:'Tu corazón se calma', d:'La frecuencia cardiaca y la presión arterial empiezan a bajar.'},
+  {ms:12*H, t:'Sangre más limpia', d:'El monóxido de carbono en sangre vuelve a niveles normales.'},
+  {ms:48*H, t:'Vuelven los sabores', d:'Las terminaciones nerviosas se recuperan: olfato y gusto mejoran.'},
+  {ms:72*H, t:'Respiras con más facilidad', d:'Los bronquios se relajan y aumenta tu capacidad respiratoria.'},
+  {ms:14*D, t:'Mejor circulación', d:'Entre 2 semanas y 3 meses mejoran la circulación y la función pulmonar.'},
+  {ms:30*D, t:'Menos tos', d:'Entre 1 y 9 meses disminuyen la tos y la falta de aire; los cilios pulmonares se regeneran.'},
+  {ms:365*D, t:'Corazón a la mitad de riesgo', d:'El riesgo de enfermedad coronaria es aproximadamente la mitad que el de una persona fumadora.'},
+  {ms:5*365*D, t:'Riesgo de ictus a la baja', d:'Entre 5 y 15 años el riesgo de ictus se acerca al de alguien que nunca fumó.'},
+  {ms:10*365*D, t:'Pulmones protegidos', d:'El riesgo de cáncer de pulmón cae a cerca de la mitad del de una persona fumadora.'},
+  {ms:15*365*D, t:'Como si nunca hubieras fumado', d:'El riesgo de enfermedad coronaria es el de una persona no fumadora.'}
+];
+const FREE_MILESTONES = 4;
+
+const BADGES = [
+  {id:'d1', t:'Primer día', s:'24 h libre', ok:() => elapsed() >= D, m:'1d'},
+  {id:'d3', t:'Lo peor pasó', s:'72 h: pico de abstinencia', ok:() => elapsed() >= 3*D, m:'3d'},
+  {id:'w1', t:'Una semana', s:'7 días seguidos', ok:() => elapsed() >= 7*D, m:'7d'},
+  {id:'w2', t:'Quincena', s:'14 días seguidos', ok:() => elapsed() >= 14*D, m:'14'},
+  {id:'m1', t:'Un mes', s:'30 días libre', ok:() => elapsed() >= 30*D, m:'1m'},
+  {id:'m3', t:'Trimestre', s:'90 días libre', ok:() => elapsed() >= 90*D, m:'3m'},
+  {id:'c100', t:'100 menos', s:'cigarrillos evitados', ok:() => cigsAvoided() >= 100, m:'100'},
+  {id:'k1', t:'Primer SOS', s:'antojo superado', ok:() => S.log.some(e => e.ok), m:'1×'},
+  {id:'k10', t:'Mente fuerte', s:'10 antojos superados', ok:() => S.log.filter(e => e.ok).length >= 10, m:'10×'}
+];
+
+const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Otro'];
+const TIPS = [
+  'Bebe un vaso de agua fría a sorbos lentos.',
+  'El antojo dura de 3 a 5 minutos. Ya llevas parte del camino.',
+  'Sal a caminar dos minutos o sube unas escaleras.',
+  'Mastica chicle sin azúcar o come una zanahoria.',
+  'Escribe a alguien que te apoye: "estoy en un antojo".',
+  'Piensa en qué vas a hacer con lo que llevas ahorrado.',
+  'Lávate la cara o las manos con agua fría.',
+  'Ocupa las manos: un bolígrafo, una pelota antiestrés.'
+];
+
+// ===== Utilidades de UI =====
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastT;
+function toast(msg){
+  const r = $('#toastRoot'); r.innerHTML = `<div class="toast">${esc(msg)}</div>`;
+  clearTimeout(toastT); toastT = setTimeout(() => r.innerHTML = '', 2600);
+}
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+
+function applyTheme(){
+  if (S.theme) document.documentElement.setAttribute('data-theme', S.theme);
+  else document.documentElement.removeAttribute('data-theme');
+}
+function statusPill(){
+  $('#statusPill').innerHTML = S.pro ? '<span class="pill pill-pro">PRO</span>' : (S.demo ? '<span class="pill pill-demo">DEMO</span>' : '');
+}
+
+// ===== Vistas =====
+let tab = 'hoy', timer = null, sos = null;
+const VIEWS = { hoy:viewHoy, salud:viewSalud, sos:viewSos, diario:viewDiario, metas:viewMetas };
+
+function render(){
+  clearInterval(timer); stopSos();
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
+  statusPill();
+  $('#view').innerHTML = '';
+  VIEWS[tab]($('#view'));
+  window.scrollTo({top:0});
+}
+function go(t){ tab = t; try { history.replaceState(null, '', '#' + t); } catch(e){} render(); }
+
+function viewHoy(root){
+  const p = S.profile;
+  root.innerHTML = `
+  <section class="view">
+    ${S.demo ? `<div class="card row" style="background:var(--gold-soft); border-color:transparent">
+      <div class="small"><b>Estás viendo un ejemplo.</b> Crea tu plan y el contador empezará con tus datos.</div>
+      <button class="btn btn-primary" id="startBtn" style="flex:none">Empezar</button></div>` : ''}
+    <div class="card hero">
+      <canvas id="air" aria-hidden="true"></canvas>
+      <div class="hero-inner">
+        <span class="label">${S.demo ? 'Ejemplo · ' : ''}${esc(p.name)} lleva sin fumar</span>
+        <div class="clock"><span class="big num" id="cDays" style="font-family:var(--display)">0</span><span class="unit" id="cUnit">días</span></div>
+        <div class="clock-sub" id="cHms">00 h 00 min 00 s</div>
+        <div class="hero-foot">Desde el ${new Date(p.quitAt).toLocaleDateString('es', {day:'numeric', month:'long', year:'numeric'})}</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b class="num" id="sMoney">—</b><span>ahorrado</span></div>
+      <div class="stat"><b class="num" id="sCigs">—</b><span>cigarrillos evitados</span></div>
+      <div class="stat"><b class="num" id="sLife">—</b><span>de vida recuperada*</span></div>
+    </div>
+    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>3 minutos de respiración guiada. El antojo pasa.</small></span></button>
+    <div class="card next" id="nextMs"></div>
+    <div class="card">
+      <div class="row"><span class="label">Tu meta</span><button class="btn btn-ghost" id="goMetas" style="min-height:36px; padding:0 12px">Ver</button></div>
+      <div id="goalMini" style="margin-top:8px"></div>
+    </div>
+    <p class="foot-note">*Estimación de ${CONFIG.minPerCig} minutos por cigarrillo. Aire no sustituye el consejo médico.</p>
+  </section>`;
+  $('#goSos').onclick = () => go('sos');
+  $('#goMetas').onclick = () => go('metas');
+  const sb = $('#startBtn'); if (sb) sb.onclick = () => openProfile(true);
+  air($('#air'));
+  const tick = () => {
+    const e = elapsed(), d = Math.floor(e / D);
+    $('#cDays').textContent = d; $('#cUnit').textContent = d === 1 ? 'día' : 'días';
+    $('#cHms').textContent = `${pad(Math.floor(e % D / H))} h ${pad(Math.floor(e % H / 60e3))} min ${pad(Math.floor(e % 60e3 / 1e3))} s`;
+    $('#sMoney').textContent = money(moneySaved());
+    $('#sCigs').textContent = int(cigsAvoided());
+    $('#sLife').textContent = lifeText();
+    const nx = MILESTONES.find(m => m.ms > e);
+    if (nx){
+      const prev = [...MILESTONES].reverse().find(m => m.ms <= e)?.ms || 0;
+      const pc = Math.min(100, (e - prev) / (nx.ms - prev) * 100);
+      $('#nextMs').innerHTML = `<span class="label">Próximo hito · en ${durText(nx.ms - e)}</span><h3>${nx.t}</h3><p class="muted small" style="margin:6px 0 12px">${nx.d}</p><div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>`;
+    }
+    const g = S.goal, pc = Math.min(100, moneySaved() / g.price * 100);
+    $('#goalMini').innerHTML = `<div class="row small"><b>${esc(g.name)}</b><span class="num">${money(moneySaved(),0)} / ${money(g.price,0)}</span></div><div class="bar" style="margin-top:8px"><i style="width:${pc.toFixed(1)}%"></i></div>`;
+  };
+  tick(); timer = setInterval(tick, 1000);
+}
+
+// Partículas de aire en la tarjeta principal
+function air(cv){
+  if (!cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ctx = cv.getContext('2d'); let w, h, raf;
+  const dots = Array.from({length:34}, () => ({x:Math.random(), y:Math.random(), r:1 + Math.random() * 3, v:.0006 + Math.random() * .0016}));
+  const size = () => { const r = cv.getBoundingClientRect(); w = cv.width = r.width * devicePixelRatio; h = cv.height = r.height * devicePixelRatio; };
+  size();
+  const step = () => {
+    if (!cv.isConnected) return cancelAnimationFrame(raf);
+    ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#fff';
+    dots.forEach(d => { d.y -= d.v; if (d.y < -.05) { d.y = 1.05; d.x = Math.random(); }
+      ctx.globalAlpha = .5; ctx.beginPath(); ctx.arc(d.x * w + Math.sin(d.y * 9) * 8, d.y * h, d.r * devicePixelRatio, 0, 7); ctx.fill(); });
+    raf = requestAnimationFrame(step);
+  };
+  step();
+}
+
+function viewSalud(root){
+  const e = elapsed();
+  const items = MILESTONES.map((m, i) => {
+    const done = e >= m.ms, locked = !S.pro && i >= FREE_MILESTONES;
+    const pc = Math.min(100, e / m.ms * 100);
+    const isNow = !done && (i === 0 || e >= MILESTONES[i-1].ms);
+    return `<li class="ms ${done ? 'done' : ''} ${isNow ? 'now' : ''} ${locked ? 'locked' : ''}" ${locked ? 'aria-hidden="true"' : ''}>
+      <span class="dot">${done ? CHECK : ''}</span>
+      <div><span class="when">${durText(m.ms)}${done ? ' · conseguido' : ' · faltan ' + durText(m.ms - e)}</span>
+      <h4>${m.t}</h4><p>${m.d}</p>${!done ? `<div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>` : ''}</div></li>`;
+  }).join('');
+  const got = MILESTONES.filter(m => e >= m.ms).length;
+  root.innerHTML = `<section class="view">
+    <div><span class="label">Tu cuerpo se recupera</span><h2 style="font-size:2rem; margin-top:4px">${got} de ${MILESTONES.length} hitos conseguidos</h2></div>
+    <div class="card"><ol class="timeline">${items}</ol></div>
+    ${S.pro ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
+    <p class="foot-note">Fuentes: Organización Mundial de la Salud y CDC. Los plazos son aproximados y varían según la persona.</p>
+  </section>`;
+  bindPaywall(root);
+}
+
+function viewSos(root){
+  root.innerHTML = `<section class="view">
+    <div class="card breath" id="breath">
+      <span class="label">Respiración 4 · 4 · 6</span>
+      <div class="lung"><span class="halo"></span><span class="core" id="core">Pulsa empezar</span></div>
+      <div class="phase" id="phase">Estás a salvo</div>
+      <div class="countdown" id="cd">3:00</div>
+      <div class="tip" id="tip">Un antojo dura de 3 a 5 minutos. Respira conmigo.</div>
+      <button class="btn btn-sos btn-block" id="sosStart">Empezar 3 minutos</button>
+    </div>
+    <div class="card" id="logCard">
+      <span class="label">¿Qué lo ha provocado?</span>
+      <div class="chips" style="margin-top:10px" id="trig">${TRIGGERS.map(t => `<button class="chip" aria-pressed="false" data-t="${t}">${t}</button>`).join('')}</div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-primary" id="okBtn">Lo he superado</button>
+        <button class="btn btn-ghost" id="slipBtn">He fumado</button>
+      </div>
+      <div id="slipConfirm"></div>
+    </div>
+    <p class="foot-note">Si te sientes mal o con ansiedad intensa, habla con tu médico o farmacéutico. Existen tratamientos que duplican las probabilidades de éxito.</p>
+  </section>`;
+  let trig = null;
+  root.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    root.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    c.setAttribute('aria-pressed', 'true'); trig = c.dataset.t;
+  });
+  $('#sosStart').onclick = startSos;
+  $('#okBtn').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'craving', trigger:trig || 'Otro', ok:true}); save(); toast('Antojo superado. Lo has guardado en tu diario.'); go('hoy'); };
+  $('#slipBtn').onclick = () => {
+    $('#slipConfirm').innerHTML = `<div class="confirm" style="margin-top:12px">
+      <b>Un desliz no borra tu progreso.</b>
+      <span class="small">Puedes apuntarlo y seguir con tu contador, o reiniciar el contador desde ahora.</span>
+      <div class="btn-row"><button class="btn btn-ghost" id="slipKeep">Apuntar y seguir</button><button class="btn btn-sos" id="slipReset">Reiniciar contador</button></div></div>`;
+    $('#slipKeep').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'slip', trigger:trig || 'Otro', ok:false}); save(); toast('Apuntado. Mañana sigues.'); go('hoy'); };
+    $('#slipReset').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'slip', trigger:trig || 'Otro', ok:false}); S.profile.quitAt = new Date().toISOString(); save(); toast('Contador reiniciado. Empieza tu nuevo intento.'); go('hoy'); };
+  };
+}
+function startSos(){
+  stopSos();
+  const core = $('#core'), phase = $('#phase'), cd = $('#cd'), tip = $('#tip'), btn = $('#sosStart');
+  const end = Date.now() + 180e3;
+  const seq = [['Inhala', 4, 1], ['Mantén', 4, 1], ['Exhala', 6, .6]];
+  let i = 0, ti = 0;
+  btn.textContent = 'Detener'; btn.onclick = () => { stopSos(); btn.textContent = 'Empezar 3 minutos'; btn.onclick = startSos; core.textContent = 'Pulsa empezar'; core.style.transform = 'scale(.6)'; phase.textContent = 'Estás a salvo'; cd.textContent = '3:00'; };
+  const next = () => {
+    const [name, sec, sc] = seq[i % 3];
+    phase.textContent = name; core.textContent = sec + ' s';
+    core.style.transitionDuration = sec + 's'; core.style.transform = `scale(${sc})`;
+    i++; sos.phaseT = setTimeout(next, sec * 1000);
+  };
+  sos = {};
+  next();
+  sos.tipT = setInterval(() => { tip.textContent = TIPS[ti++ % TIPS.length]; }, 12000);
+  tip.textContent = TIPS[ti++];
+  sos.cdT = setInterval(() => {
+    const left = Math.max(0, end - Date.now());
+    cd.textContent = `${Math.floor(left / 60e3)}:${pad(Math.floor(left % 60e3 / 1e3))}`;
+    if (!left){ stopSos(); phase.textContent = '¡Lo has conseguido!'; core.textContent = '3 min'; core.style.transform = 'scale(1)'; btn.textContent = 'Otra ronda'; btn.onclick = startSos; $('#logCard').scrollIntoView({behavior:'smooth', block:'center'}); }
+  }, 250);
+  try { navigator.wakeLock?.request('screen').then(l => { if (sos) sos.lock = l; }).catch(() => {}); } catch(e){}
+}
+function stopSos(){
+  if (!sos) return;
+  clearTimeout(sos.phaseT); clearInterval(sos.tipT); clearInterval(sos.cdT);
+  try { sos.lock?.release(); } catch(e){}
+  sos = null;
+}
+
+function viewDiario(root){
+  if (!S.pro){
+    root.innerHTML = `<section class="view"><div><span class="label">Diario</span><h2 style="font-size:2rem; margin-top:4px">Conoce tus detonantes</h2></div>
+      <p class="muted" style="margin:0">Cada antojo que apuntas en SOS se guarda aquí. Aire te muestra qué lo provoca y a qué horas eres más vulnerable, para que puedas anticiparte.</p>
+      ${paywall('El diario con estadísticas forma parte de Aire Pro.')}</section>`;
+    return bindPaywall(root);
+  }
+  const ok = S.log.filter(e => e.ok).length, slips = S.log.length - ok;
+  const counts = {}; S.log.forEach(e => counts[e.trigger] = (counts[e.trigger] || 0) + 1);
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const max = top[0]?.[1] || 1;
+  const hrs = Array(24).fill(0); S.log.forEach(e => hrs[new Date(e.t).getHours()]++);
+  const hmax = Math.max(1, ...hrs);
+  const list = S.log.slice(0, 30).map(e => `<li class="entry"><span class="tag ${e.ok ? '' : 'slip'}"></span>
+    <div><b>${e.ok ? 'Antojo superado' : 'Desliz'}</b> <span class="muted small">· ${esc(e.trigger)}</span></div>
+    <time datetime="${e.t}">${new Date(e.t).toLocaleString('es', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</time></li>`).join('');
+  root.innerHTML = `<section class="view">
+    <div><span class="label">Diario</span><h2 style="font-size:2rem; margin-top:4px">${ok} antojos superados</h2>
+    <p class="muted" style="margin:6px 0 0">${slips ? slips + (slips === 1 ? ' desliz' : ' deslices') + ' apuntados. Siguen contando como aprendizaje.' : 'Sin deslices. Vas muy bien.'}</p></div>
+    <div class="card"><span class="label">Qué te provoca</span>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px">
+      ${top.length ? top.map(([t, n]) => `<div class="hbar"><span>${esc(t)}</span><div class="bar"><i style="width:${n / max * 100}%"></i></div><span class="num">${n}</span></div>`).join('') : '<p class="muted">Aún no hay antojos apuntados. Usa SOS cuando aparezca uno.</p>'}
+      </div></div>
+    <div class="card"><span class="label">A qué hora aparecen</span>
+      <div class="hours" style="margin-top:14px" role="img" aria-label="Antojos por hora del día">${hrs.map((n, h) => `<i title="${h}:00 · ${n}" style="height:${n / hmax * 100}%; opacity:${n ? 1 : .25}"></i>`).join('')}</div>
+      <div class="hours-axis"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>23 h</span></div></div>
+    <div class="card"><span class="label">Historial</span><ul class="entries" style="margin-top:6px">${list || '<li class="muted">Vacío</li>'}</ul></div>
+  </section>`;
+}
+
+function viewMetas(root){
+  const saved = moneySaved(), g = S.goal, pc = Math.min(1, saved / g.price);
+  const perDayMoney = S.profile.perDay / S.profile.perPack * S.profile.packPrice;
+  const daysLeft = Math.max(0, Math.ceil((g.price - saved) / perDayMoney));
+  const R = 50, C = 2 * Math.PI * R;
+  const badges = BADGES.map(b => { const got = b.ok(); return `<div class="badge ${got ? 'got' : ''}"><span class="medal">${b.m}</span><b>${b.t}</b><small>${b.s}</small></div>`; }).join('');
+  root.innerHTML = `<section class="view">
+    <div><span class="label">Metas</span><h2 style="font-size:2rem; margin-top:4px">Tu dinero tiene destino</h2></div>
+    <div class="card" style="${S.pro ? '' : 'filter:blur(3px); opacity:.6'}" ${S.pro ? '' : 'aria-hidden="true"'}>
+      <div class="goal">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
+          <circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pc)}" transform="rotate(-90 60 60)"/>
+          <text x="60" y="66" text-anchor="middle" font-family="DM Mono, monospace" font-size="20" fill="var(--ink)">${Math.round(pc * 100)}%</text></svg>
+        <div style="min-width:0"><h3 style="font-size:1.3rem">${esc(g.name)}</h3>
+          <p class="muted small" style="margin:6px 0"><span class="num">${money(saved, 0)}</span> de <span class="num">${money(g.price, 0)}</span></p>
+          <p class="small" style="margin:0">${daysLeft ? `Lo tendrás en <b>${daysLeft} días</b> sin fumar.` : '<b>¡Meta conseguida! Date el capricho.</b>'}</p></div>
+      </div>
+      ${S.pro ? `<div class="grid2" style="margin-top:16px">
+        <div class="field"><label for="gName">Meta</label><input id="gName" value="${esc(g.name)}" maxlength="40"></div>
+        <div class="field"><label for="gPrice">Precio (${esc(S.profile.currency)})</label><input id="gPrice" type="number" min="1" step="1" inputmode="numeric" value="${g.price}"></div></div>
+        <button class="btn btn-ghost btn-block" id="gSave" style="margin-top:12px">Guardar meta</button>` : ''}
+    </div>
+    <div class="card"><div class="row"><span class="label">Proyección de ahorro</span></div>
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><b class="num">${money(perDayMoney * 30, 0)}</b><span>en un mes</span></div>
+        <div class="stat"><b class="num">${money(perDayMoney * 182, 0)}</b><span>en 6 meses</span></div>
+        <div class="stat"><b class="num">${money(perDayMoney * 365, 0)}</b><span>en un año</span></div>
+      </div></div>
+    <div><span class="label">Logros · ${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</span></div>
+    <div class="badges">${badges}</div>
+    ${S.pro ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
+  </section>`;
+  const gs = $('#gSave');
+  if (gs) gs.onclick = () => {
+    const n = $('#gName').value.trim(), p = parseFloat($('#gPrice').value);
+    if (!n || !(p > 0)) return toast('Escribe un nombre y un precio mayor que cero.');
+    S.goal = {name:n, price:p}; save(); toast('Meta guardada'); render();
+  };
+  bindPaywall(root);
+}
+
+// ===== Pago único =====
+function newClaim(){
+  try { return crypto.randomUUID(); } catch(e){ return Array.from({length:32}, () => Math.floor(Math.random() * 16).toString(16)).join(''); }
+}
+function checkoutHref(){
+  if (!S.claim) { S.claim = newClaim(); save(); }
+  const u = CONFIG.checkoutUrl + (CONFIG.checkoutUrl.includes('?') ? '&' : '?');
+  return u + encodeURIComponent('checkout[custom][claim]') + '=' + S.claim + '&' + encodeURIComponent('checkout[custom][app]') + '=aire';
+}
+async function api(path, body){
+  const res = await fetch(CONFIG.apiBase + path, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {});
+  return res.json();
+}
+async function activateKey(key){
+  try {
+    const r = await api('/activate', {key, device:'Aire · ' + (navigator.platform || 'móvil')});
+    if (!r.ok) return toast(r.error || 'No se pudo activar la licencia.');
+    S.pro = true; S.license = {key, instance:r.instance, checked:Date.now()};
+    delete S.pendingAt; delete S.claim; save();
+    toast('Aire Pro activado. ¡Gracias por tu compra!'); render();
+  } catch(e){ toast('Sin conexión. Inténtalo cuando tengas internet.'); }
+}
+let pollT = null;
+async function pollClaim(){
+  clearTimeout(pollT);
+  if (!LIVE || S.pro || !S.pendingAt || !S.claim) return;
+  if (Date.now() - S.pendingAt > 2 * H){ delete S.pendingAt; save(); return; }
+  try {
+    const r = await api('/claim?c=' + S.claim);
+    if (r.status === 'paid' && r.key) return activateKey(r.key);
+  } catch(e){}
+  pollT = setTimeout(pollClaim, 4000);
+}
+async function revalidate(){
+  if (!LIVE || !S.license || Date.now() - (S.license.checked || 0) < 7 * D) return;
+  try {
+    const r = await api('/validate', {key:S.license.key, instance:S.license.instance});
+    if (r.valid === false){ S.pro = false; delete S.license; toast('Tu licencia ya no es válida (reembolso o desactivación).'); }
+    else S.license.checked = Date.now();
+    save(); render();
+  } catch(e){}
+}
+function paywall(why){
+  const pay = LIVE
+    ? `<a class="btn btn-primary btn-block" data-pay href="${esc(checkoutHref())}" target="_blank" rel="noopener" style="text-decoration:none">Desbloquear por ${CONFIG.priceLabel}</a>`
+    : `<button class="btn btn-primary btn-block" data-pay>Desbloquear por ${CONFIG.priceLabel}</button>`;
+  const pending = LIVE && S.pendingAt ? `<p class="small" style="margin:10px 0 0; color:var(--accent)"><b>Esperando la confirmación del pago…</b> Se activa solo en cuanto se complete.</p>` : '';
+  return `<div class="card paywall">
+    <span class="label" style="color:var(--accent)">Aire Pro</span>
+    <h3 style="margin-top:6px">${why}</h3>
+    <div class="price" style="margin-top:10px">${CONFIG.priceLabel.replace(' USD', '')}<small> USD · pago único, para siempre</small></div>
+    <ul class="checks"><li>Los 10 hitos de salud, hasta los 15 años</li><li>Diario con detonantes y horas críticas</li><li>Meta de ahorro con cuenta atrás</li><li>9 logros para celebrar cada avance</li><li>Sin suscripciones ni anuncios</li></ul>
+    ${pay}${pending}
+    <div class="code-row"><input id="codeIn" placeholder="${LIVE ? 'Pega tu licencia del email' : '¿Tienes un código?'}" aria-label="Licencia o código de desbloqueo" autocomplete="off" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" data-code>Activar</button></div>
+    <p class="small muted" style="margin:10px 0 0">${LIVE ? 'Pago seguro con Lemon Squeezy. Recibes tu licencia por email para usarla también en otro móvil.' : `Vista previa: usa el código <b class="num">${CONFIG.demoCode}</b>`}</p>
+  </div>`;
+}
+function bindPaywall(root){
+  root.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => {
+    if (!LIVE) return toast('El pago se conecta al publicar la app en tu dominio.');
+    S.pendingAt = Date.now(); save(); pollClaim();
+  });
+  root.querySelectorAll('[data-code]').forEach(b => b.onclick = () => {
+    const v = $('#codeIn', root).value.trim();
+    if (!v) return toast(LIVE ? 'Pega la licencia que recibiste por email.' : 'Escribe el código.');
+    if (LIVE) return activateKey(v);
+    if (v.toUpperCase() === CONFIG.demoCode){ S.pro = true; save(); toast('Aire Pro activado'); render(); }
+    else toast('Ese código no es válido. Revisa el que recibiste tras el pago.');
+  });
+}
+
+// ===== Perfil y ajustes =====
+function openProfile(fromDemo){
+  const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:6, currency:'USD', years:5} : S.profile;
+  const dt = new Date(new Date(p.quitAt).getTime() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
+  const cur = ['USD','EUR','MXN','COP','ARS','CLP','PEN','GBP'];
+  sheet(`<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
+    <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
+    <form id="pf" style="display:flex; flex-direction:column; gap:12px">
+      <div class="field"><label for="fName">Tu nombre</label><input id="fName" required maxlength="24" value="${esc(p.name)}" placeholder="Cómo quieres que te llamemos"></div>
+      <div class="field"><label for="fQuit">Último cigarrillo</label><input id="fQuit" type="datetime-local" required value="${dt}"></div>
+      <div class="grid2">
+        <div class="field"><label for="fDay">Cigarrillos al día</label><input id="fDay" type="number" min="1" max="100" required inputmode="numeric" value="${p.perDay}"></div>
+        <div class="field"><label for="fPack">Por paquete</label><input id="fPack" type="number" min="1" max="60" required inputmode="numeric" value="${p.perPack}"></div>
+        <div class="field"><label for="fPrice">Precio del paquete</label><input id="fPrice" type="number" min="0.1" step="0.01" required inputmode="decimal" value="${p.packPrice}"></div>
+        <div class="field"><label for="fCur">Moneda</label><select id="fCur">${cur.map(c => `<option ${c === p.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">${fromDemo ? 'Empezar mi contador' : 'Guardar'}</button>
+      <button class="btn btn-ghost btn-block" type="button" data-close>Cancelar</button>
+    </form>`);
+  $('#pf').onsubmit = ev => {
+    ev.preventDefault();
+    const q = new Date($('#fQuit').value);
+    if (isNaN(q) || q > new Date()) return toast('La fecha del último cigarrillo no puede estar en el futuro.');
+    const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:p.years};
+    if (fromDemo){ S = {demo:false, pro:S.pro, license:S.license, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[]}; }
+    else S.profile = np;
+    save(); closeSheet(); toast(fromDemo ? 'Tu contador ha empezado. ¡A por ello!' : 'Datos guardados'); go('hoy');
+  };
+}
+function openSettings(){
+  sheet(`<h2>Ajustes</h2>
+    <button class="btn btn-ghost btn-block" id="stProfile">${S.demo ? 'Crear mi plan' : 'Editar mis datos'}</button>
+    <button class="btn btn-ghost btn-block" id="stTheme">Tema: ${S.theme === 'dark' ? 'oscuro' : S.theme === 'light' ? 'claro' : 'automático'}</button>
+    ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
+    <button class="btn btn-ghost btn-block" id="stReset" style="color:var(--sos); border-color:var(--sos)">Borrar todos mis datos</button>
+    <div id="stConfirm"></div>
+    <button class="btn btn-primary btn-block" data-close>Cerrar</button>
+    <p class="foot-note">Aire · una app de KREA Digital Studio</p>`);
+  $('#stProfile').onclick = () => { closeSheet(); openProfile(S.demo); };
+  $('#stTheme').onclick = () => { cycleTheme(); openSettings(); };
+  $('#stReset').onclick = () => {
+    $('#stConfirm').innerHTML = `<div class="confirm"><b>¿Borrar todo?</b><span class="small">Se eliminarán tu contador, tu diario y tu meta. No se puede deshacer.</span>
+      <div class="btn-row"><button class="btn btn-ghost" id="rsNo">Mantener</button><button class="btn btn-sos" id="rsYes">Borrar</button></div></div>`;
+    $('#rsNo').onclick = () => $('#stConfirm').innerHTML = '';
+    $('#rsYes').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = demoState(); closeSheet(); applyTheme(); toast('Datos borrados'); go('hoy'); };
+  };
+}
+function sheet(html){
+  $('#sheetRoot').innerHTML = `<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  $('#sbg').onclick = e => { if (e.target.id === 'sbg' || e.target.hasAttribute('data-close')) closeSheet(); };
+  setTimeout(() => $('.sheet input, .sheet button')?.focus(), 50);
+}
+function closeSheet(){ $('#sheetRoot').innerHTML = ''; }
+function cycleTheme(){
+  const dark = S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  S.theme = dark ? 'light' : 'dark'; save(); applyTheme();
+}
+
+// ===== Arranque =====
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
+$('#settingsBtn').onclick = openSettings;
+$('#themeBtn').onclick = cycleTheme;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pollClaim(); });
+const h = (location.hash || '').slice(1);
+if (VIEWS[h]) tab = h;
+applyTheme(); render(); pollClaim(); revalidate();
+if (LIVE && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
