@@ -64,6 +64,6 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - Airi habla en voz alta y usa el nombre del usuario; ficha inicial con edad y años fumando.
 - Modo juego, reto del día, logros bronce/plata/oro, instalación con un toque y vista previa en WhatsApp.
 - Código de invitación: AIRE2026 (solo su huella en el código).
-- **Siguiente:** Kike y su familia prueban la app y cuentan sus impresiones. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
+- **Siguiente:** prueba con conocidos SIN código durante 7 días; el día 8 (app bloqueada) Kike les da AIRE2026 para seguir. Si gusta: alta de autónomo, Google Play Console (25 $ pago único) y cobro. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
 
 Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.
