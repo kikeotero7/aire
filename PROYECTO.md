@@ -58,4 +58,12 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - **Pulmones de papel** (`img/pulmones.webp`): en la sección de salud de la web y en la pestaña Salud, donde se colorean según los hitos conseguidos.
 - Originales en `img/src/`. Propuestas descartadas o pendientes en `store/fotos-propuesta/`.
 
+## Estado al 19/10/2026
+- Web y app publicadas en https://aire.kreadigitalstudio.es y https://aire.kreadigitalstudio.es/app/
+- Portada: pareja fusionada (`img/portada-fusionada*.webp`); pareja de cuerpo entero en el SOS y la bienvenida.
+- Airi habla en voz alta y usa el nombre del usuario; ficha inicial con edad y años fumando.
+- Modo juego, reto del día, logros bronce/plata/oro, instalación con un toque y vista previa en WhatsApp.
+- Código de invitación: AIRE2026 (solo su huella en el código).
+- **Siguiente:** Kike y su familia prueban la app y cuentan sus impresiones. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
+
 Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.
