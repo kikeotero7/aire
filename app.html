@@ -68,7 +68,7 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 
 /* Contador principal */
 .hero{position:relative; overflow:hidden; background:var(--hero); color:var(--on-hero); border:0; padding:22px 20px 20px; isolation:isolate}
-.hero .hero-bg{position:absolute; inset:0; z-index:-1; background:url('../img/portada-pareja-900.webp') right -46px top 28% / auto 135% no-repeat}
+.hero .hero-bg{position:absolute; inset:0; z-index:-1; background:url('../img/portada-fusionada-900.webp') right -60px top 0 / auto 118% no-repeat}
 .hero .hero-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(100deg, var(--hero) 36%, color-mix(in srgb, var(--hero) 45%, transparent) 60%, color-mix(in srgb, var(--hero) 8%, transparent))}
 .hero-lead{font-weight:600; font-size:1rem; opacity:.92}
 .hero .label{color:inherit; opacity:.8}
@@ -119,6 +119,9 @@ a{color:var(--accent)}
 
 /* SOS */
 .breath{display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 18px}
+.breath{position:relative; overflow:hidden; isolation:isolate}
+.breath::before{content:""; position:absolute; inset:0; z-index:-1; background:url('../img/portada-pareja-900.webp') center 30% / cover no-repeat; opacity:.28}
+.breath::after{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, color-mix(in srgb, var(--surface) 35%, transparent), var(--surface) 92%)}
 .lung{position:relative; width:min(72vw, 260px); aspect-ratio:1; max-width:100%; display:grid; place-items:center}
 .lung .halo{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)}
 .lung .core{width:58%; aspect-ratio:1; border-radius:50%; background:var(--accent); transform:scale(.6); transition:transform 4s cubic-bezier(.45,0,.3,1); display:grid; place-items:center; color:var(--on-accent); font-family:var(--display); font-weight:700; font-size:1.1rem; text-align:center; padding:10px}
@@ -250,6 +253,8 @@ textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border
 .airi-hero img{width:96px; height:96px; border-radius:24px; object-fit:cover; background:var(--accent-soft)}
 .airi-hero b{font-family:var(--display); font-size:1.2rem; display:block}
 .airi-hero p{margin:4px 0 0; color:var(--muted); font-size:.92rem}
+.sheet .welcome-photo{width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; object-position:50% 45%; border-radius:20px; display:block}
+.sheet .welcome-photo + .airi-welcome{margin-top:-58px; border:4px solid var(--bg)}
 .sheet .airi-welcome{width:110px; height:110px; border-radius:28px; object-fit:cover; align-self:center; background:var(--accent-soft)}
 /* Pulmones que se llenan de vida con los hitos */
 .lungs{position:relative; max-width:300px; margin:0 auto; aspect-ratio:600/533}
@@ -1017,7 +1022,7 @@ function openProfile(fromDemo){
   const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:5} : S.profile;
   const dt = new Date(new Date(p.quitAt).getTime() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
   const cur = ['EUR','USD','MXN','COP','ARS','CLP','PEN','GBP'];
-  sheet(`${fromDemo ? `<img class="airi-welcome" src="${AIRI.feliz}" alt="Airi, la mascota de Aire">` : ''}<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
+  sheet(`${fromDemo ? `<img class="welcome-photo" src="../img/portada-pareja-900.webp" alt="Una mujer y un hombre espalda con espalda, respirando hondo"><img class="airi-welcome" src="${AIRI.feliz}" alt="Airi, la mascota de Aire">` : ''}<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
     <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
     <form id="pf" style="display:flex; flex-direction:column; gap:12px">
       <div class="field"><label for="fName">Tu nombre</label><input id="fName" required maxlength="24" value="${esc(p.name)}" placeholder="Cómo quieres que te llamemos"></div>
