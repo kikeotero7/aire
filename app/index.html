@@ -8,6 +8,15 @@
 <title>Aire · Deja de fumar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Aire: la app para dejar de fumar. Contador en vivo, dinero ahorrado, hitos de salud, botón SOS para antojos y diario de progreso.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Aire">
+<meta property="og:title" content="Aire · Deja de fumar">
+<meta property="og:description" content="Cuenta tus días sin fumar, mira tu ahorro y supera cada antojo con el SOS. 7 días gratis.">
+<meta property="og:url" content="https://aire.kreadigitalstudio.es/app/">
+<meta property="og:image" content="https://aire.kreadigitalstudio.es/img/og-aire.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0E7C66">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -565,6 +574,24 @@ function renderGame(){
     };
   }
 }
+// Instalar la app con su icono: botón directo en Android/ordenador, instrucciones en iPhone
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; renderInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; S.installed = true; save(); renderInstall(); airi('celebra', `¡Ya me tienes en tu móvil${N()}!`, 'Búscame con el icono verde de Aire.'); });
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+function renderInstall(){
+  const el = $('#installCard'); if (!el) return;
+  if (isStandalone() || S.installed || S.hideInstall) { el.innerHTML = ''; return; }
+  if (installEvt) {
+    el.innerHTML = `<div class="card row"><div class="small"><b>Instala Aire en tu móvil</b><br>Con su icono y funcionando sin internet.</div><button class="btn btn-primary" id="installGo" style="flex:none">Instalar</button></div>`;
+    $('#installGo').onclick = async () => { installEvt.prompt(); try { await installEvt.userChoice; } catch(e){} installEvt = null; renderInstall(); };
+  } else if (isIOS()) {
+    el.innerHTML = `<div class="card"><div class="row"><b>Instala Aire en tu iPhone</b><button class="airi-x" id="installNo" aria-label="Ocultar">×</button></div>
+      <p class="small muted" style="margin:6px 0 0">1. Pulsa <b>Compartir</b> (el cuadrado con la flecha) abajo en Safari.<br>2. Elige <b>Añadir a pantalla de inicio</b>.<br>3. Pulsa <b>Añadir</b>.</p></div>`;
+    $('#installNo').onclick = () => { S.hideInstall = true; save(); renderInstall(); };
+  } else el.innerHTML = '';
+}
 const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Otro'];
 const TIPS = [
   'Bebe un vaso de agua fría a sorbos lentos.',
@@ -660,6 +687,7 @@ function viewHoy(root){
       <div class="stat"><b class="num" id="sLife">—</b><span>de vida recuperada*</span></div>
     </div>
     <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>3 minutos de respiración guiada. El antojo pasa.</small></span></button>
+    <div id="installCard"></div>
     <div class="card" id="levelCard"></div>
     <div class="card" id="missionCard"></div>
     <div class="card" id="checkin"></div>
@@ -681,6 +709,7 @@ function viewHoy(root){
   $('#shareBtn').onclick = openShare;
   renderCheckin();
   renderGame();
+  renderInstall();
   air($('#air'));
   const tick = () => {
     const e = elapsed(), d = Math.floor(e / D);
