@@ -12,7 +12,9 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 ## Decisiones tomadas
 - Se trabaja **solo desde Claude Code**, en una única sesión (dos sesiones a la vez se pisan los cambios).
 - Aire es un proyecto **separado de Krea Velvet**: repositorio propio `kikeotero7/aire`. No mezclar.
-- Precio: **pago único 9,99 €**, sin suscripción y sin prueba gratis.
+- Modelo: **7 días de prueba con todo incluido** desde la primera apertura; después la app se bloquea (el SOS sigue gratis) hasta comprar.
+- **Códigos de invitación** para enseñarla a conocidos: en `CONFIG.inviteHashes` de `app.html` se guarda solo la huella del código, nunca el código. Para crear uno nuevo, pídeselo a Claude.
+- Precio: **pago único 9,99 €**, sin suscripción.
   Lanzamiento a **6,99 € hasta el 30/11/2026**, sin precio tachado (descuento `LANZAMIENTO` en Lemon Squeezy con la misma fecha).
   Garantía voluntaria de devolución de 14 días.
 - Moneda principal: euros (público en España).
