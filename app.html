@@ -97,7 +97,11 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 .ms h4{margin:2px 0 2px; font-size:1rem; font-weight:700}
 .ms .when{font-family:var(--mono); font-size:.78rem; color:var(--accent); font-weight:500}
 .ms p{margin:0 0 8px; color:var(--muted); font-size:.92rem}
-.ms.locked{filter:blur(3px); opacity:.6; user-select:none}
+.ms.locked .dot{border-style:dashed; color:var(--muted)}
+.ms.locked h4{color:var(--muted)}
+.ms.locked .when{color:var(--muted)}
+.ms .pro-tag{display:inline-flex; align-items:center; gap:6px; margin:2px 0 8px; font-size:.82rem; font-weight:700; color:var(--accent)}
+.ms .pro-tag svg{width:14px; height:14px}
 
 /* SOS */
 .breath{display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 18px}
@@ -388,6 +392,7 @@ function toast(msg){
   const r = $('#toastRoot'); r.innerHTML = `<div class="toast">${esc(msg)}</div>`;
   clearTimeout(toastT); toastT = setTimeout(() => r.innerHTML = '', 2600);
 }
+const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
 
 function applyTheme(){
@@ -514,10 +519,10 @@ function viewSalud(root){
     const done = e >= m.ms, locked = !S.pro && i >= FREE_MILESTONES;
     const pc = Math.min(100, e / m.ms * 100);
     const isNow = !done && (i === 0 || e >= MILESTONES[i-1].ms);
-    return `<li class="ms ${done ? 'done' : ''} ${isNow ? 'now' : ''} ${locked ? 'locked' : ''}" ${locked ? 'aria-hidden="true"' : ''}>
-      <span class="dot">${done ? CHECK : ''}</span>
+    return `<li class="ms ${done ? 'done' : ''} ${isNow ? 'now' : ''} ${locked ? 'locked' : ''}">
+      <span class="dot">${done ? CHECK : locked ? LOCK : ''}</span>
       <div><span class="when">${durText(m.ms)}${done ? ' · conseguido' : ' · faltan ' + durText(m.ms - e)}</span>
-      <h4>${m.t}</h4><p>${m.d}</p>${!done ? `<div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>` : ''}</div></li>`;
+      <h4>${m.t}</h4>${locked ? `<span class="pro-tag">${LOCK} Descúbrelo con Aire Pro</span>` : `<p>${m.d}</p>`}${!done && !locked ? `<div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>` : ''}</div></li>`;
   }).join('');
   const got = MILESTONES.filter(m => e >= m.ms).length;
   root.innerHTML = `<section class="view">
