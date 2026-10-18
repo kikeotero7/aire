@@ -12,6 +12,7 @@
   --accent:#0E7C66; --accent-soft:#C9E7DD; --on-accent:#FFFFFF;
   --sos:#D9472F; --sos-soft:#F8D9D1; --on-sos:#FFFFFF;
   --gold:#A87F12; --gold-soft:#F1E3B8;
+  --hero:#0E7C66; --on-hero:#FFFFFF;
   --display:'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --body:'Figtree', 'Helvetica Neue', Arial, system-ui, sans-serif;
   --mono:'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
@@ -21,18 +22,18 @@
   --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
   --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
   --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
-  --gold:#E6C25A; --gold-soft:#3A2F10; color-scheme:dark } }
+  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
   --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
   --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
-  --gold:#E6C25A; --gold-soft:#3A2F10; color-scheme:dark }
+  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; color-scheme:dark }
 
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; margin:0}
 body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--bg)}
-button,input,select{font:inherit; color:inherit}
+button,input,select,textarea{font:inherit; color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
 .num{font-family:var(--mono); font-variant-numeric:tabular-nums}
@@ -55,7 +56,8 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px}
 
 /* Contador principal */
-.hero{position:relative; overflow:hidden; background:var(--accent); color:var(--on-accent); border:0; padding:22px 20px 20px}
+.hero{position:relative; overflow:hidden; background:var(--hero); color:var(--on-hero); border:0; padding:22px 20px 20px}
+.hero-lead{font-weight:600; font-size:1rem; opacity:.92}
 .hero .label{color:inherit; opacity:.8}
 .hero canvas{position:absolute; inset:0; width:100%; height:100%; opacity:.35; pointer-events:none}
 .hero-inner{position:relative; display:flex; flex-direction:column; gap:10px}
@@ -174,6 +176,47 @@ nav.tabs button.tab-sos[aria-current="page"]{background:var(--sos-soft)}
 .toast{position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:12px; font-weight:600; font-size:.9rem; max-width:calc(100% - 32px)}
 .foot-note{font-size:.78rem; color:var(--muted); text-align:center; padding:8px 0}
 
+/* Superficies del navegador */
+html{caret-color:var(--accent); -webkit-tap-highlight-color:transparent; scrollbar-color:var(--line) transparent}
+::selection{background:var(--accent-soft); color:var(--ink)}
+/* Respuesta al tocar */
+.btn,.chip,.sos-btn,.icon-btn,nav.tabs button,.mood button{transition:transform .16s cubic-bezier(.2,.8,.2,1), background-color .2s ease, border-color .2s ease}
+.btn:active,.chip:active,.sos-btn:active,.icon-btn:active,nav.tabs button:active,.mood button:active{transform:scale(.97)}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+/* Cabecera de cada vista */
+.vh{display:flex; flex-direction:column; gap:6px}
+.vh h2{font-size:2rem}
+.vh p{margin:0; color:var(--muted); max-width:60ch}
+h3.sec{font-size:1.15rem; display:flex; gap:8px; align-items:baseline}
+h3.sec span{font-family:var(--body); font-size:.85rem; font-weight:600}
+.next .row h3{margin:0}
+/* Check-in diario */
+.mood{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-top:12px}
+.mood button{border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:12px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; font-weight:700; font-size:.9rem}
+.mood svg{width:28px; height:28px}
+.mood button[data-m="bien"]{color:var(--accent)}
+.mood button[data-m="regular"]{color:var(--gold)}
+.mood button[data-m="dificil"]{color:var(--sos)}
+.mood button span{color:var(--ink)}
+.done-line{display:flex; align-items:center; gap:10px}
+.done-line .dot-ok{flex:none; width:32px; height:32px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center}
+.done-line .dot-ok svg{width:16px; height:16px}
+/* Razones */
+.reasons{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.reason{background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:6px 12px; font-weight:700; font-size:.88rem}
+.reason-now{font-family:var(--display); font-size:1.15rem; font-weight:700; color:var(--accent); text-align:center; min-height:1.4em}
+/* Estado de ánimo en el diario */
+.moods{display:grid; grid-template-columns:repeat(14, minmax(0,1fr)); gap:4px; margin-top:12px}
+.moods i{aspect-ratio:1; border-radius:6px; background:var(--surface-2)}
+.moods i.bien{background:var(--accent)} .moods i.regular{background:var(--gold)} .moods i.dificil{background:var(--sos)}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.78rem; color:var(--muted); margin-top:8px}
+.legend span::before{content:""; display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; background:var(--c)}
+/* Compartir */
+.share-btn{display:flex; align-items:center; justify-content:center; gap:10px}
+.share-btn svg{width:18px; height:18px}
+.share-img{width:100%; max-width:320px; align-self:center; border-radius:18px; box-shadow:0 18px 40px -18px color-mix(in srgb, var(--ink) 50%, transparent)}
+textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:10px 12px; font-family:var(--mono); font-size:.78rem; resize:vertical}
+.lung .core{font-size:1.25rem}
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important; transition:none !important}
 }
@@ -228,6 +271,7 @@ const priceNow = () => eur(isLaunch() ? CONFIG.launchPrice : CONFIG.price);
 const launchDate = () => new Date(CONFIG.launchEnds).toLocaleDateString('es-ES', {day:'numeric', month:'long', timeZone:'Europe/Madrid'});
 const KEY = 'aire.v1';
 const H = 3600e3, D = 24 * H;
+const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
 // ===== Estado =====
 function demoState(){
@@ -237,6 +281,8 @@ function demoState(){
     demo:true, pro:false, theme:null,
     profile:{ name:'Laura', quitAt: at(9, 4.2), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:12 },
     goal:{ name:'Escapada de fin de semana', price:250 },
+    reasons:['Mi salud','Mi familia','Ahorrar'],
+    checkins:Object.fromEntries([1,2,3,4,5,6,7,8].map(d => [dayKey(now - d * D), ['bien','regular','bien','dificil','regular','bien','bien','regular'][d-1]])),
     log:[
       {t:at(0,3), kind:'craving', trigger:'Café', ok:true},
       {t:at(0,9), kind:'craving', trigger:'Estrés', ok:true},
@@ -258,6 +304,7 @@ function load(){
   return demoState();
 }
 let S = load();
+S.reasons = S.reasons || []; S.checkins = S.checkins || {};
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 
 // ===== Cálculos =====
@@ -309,6 +356,18 @@ const BADGES = [
   {id:'k10', t:'Mente fuerte', s:'10 antojos superados', ok:() => S.log.filter(e => e.ok).length >= 10, m:'10×'}
 ];
 
+const REASONS = ['Mi salud','Mi familia','Ahorrar','Respirar mejor','Hacer deporte','Dar ejemplo','Oler bien','Ser libre','Mi embarazo','Mi piel'];
+const MOODS = [
+  {id:'bien', t:'Bien', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9.5h.01M15 9.5h.01"/></svg>'},
+  {id:'regular', t:'Regular', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7M9 9.5h.01M15 9.5h.01"/></svg>'},
+  {id:'dificil', t:'Difícil', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 16s1.5-2 4-2 4 2 4 2M9 9.5h.01M15 9.5h.01"/></svg>'}
+];
+function checkinStreak(){
+  let n = 0, t = Date.now();
+  if (!S.checkins[dayKey(t)]) t -= D;
+  while (S.checkins[dayKey(t)]) { n++; t -= D; }
+  return n;
+}
 const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Otro'];
 const TIPS = [
   'Bebe un vaso de agua fría a sorbos lentos.',
@@ -363,7 +422,7 @@ function viewHoy(root){
     <div class="card hero">
       <canvas id="air" aria-hidden="true"></canvas>
       <div class="hero-inner">
-        <span class="label">${S.demo ? 'Ejemplo · ' : ''}${esc(p.name)} lleva sin fumar</span>
+        <span class="hero-lead">${S.demo ? 'Ejemplo: ' : ''}${esc(p.name)} lleva sin fumar</span>
         <div class="clock"><span class="big num" id="cDays" style="font-family:var(--display)">0</span><span class="unit" id="cUnit">días</span></div>
         <div class="clock-sub" id="cHms">00 h 00 min 00 s</div>
         <div class="hero-foot">Desde el ${new Date(p.quitAt).toLocaleDateString('es', {day:'numeric', month:'long', year:'numeric'})}</div>
@@ -375,16 +434,23 @@ function viewHoy(root){
       <div class="stat"><b class="num" id="sLife">—</b><span>de vida recuperada*</span></div>
     </div>
     <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>3 minutos de respiración guiada. El antojo pasa.</small></span></button>
+    <div class="card" id="checkin"></div>
     <div class="card next" id="nextMs"></div>
+    ${S.reasons.length ? `<div class="card"><div class="row"><h3 class="sec">Por qué lo dejas</h3><button class="btn btn-ghost" id="editReasons" style="min-height:36px; padding:0 12px">Editar</button></div><div class="reasons">${S.reasons.map(r => `<span class="reason">${esc(r)}</span>`).join('')}</div></div>`
+      : `<button class="card btn-ghost" id="editReasons" style="text-align:left; cursor:pointer"><h3 class="sec">Añade por qué lo dejas</h3><p class="muted small" style="margin:4px 0 0">Tus motivos aparecerán en el SOS cuando más los necesites.</p></button>`}
     <div class="card">
-      <div class="row"><span class="label">Tu meta</span><button class="btn btn-ghost" id="goMetas" style="min-height:36px; padding:0 12px">Ver</button></div>
+      <div class="row"><h3 class="sec">Tu meta</h3><button class="btn btn-ghost" id="goMetas" style="min-height:36px; padding:0 12px">Ver</button></div>
       <div id="goalMini" style="margin-top:8px"></div>
     </div>
+    <button class="btn btn-ghost btn-block share-btn" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Compartir mi progreso</button>
     <p class="foot-note">*Estimación de ${CONFIG.minPerCig} minutos por cigarrillo. Aire no sustituye el consejo médico.</p>
   </section>`;
   $('#goSos').onclick = () => go('sos');
   $('#goMetas').onclick = () => go('metas');
   const sb = $('#startBtn'); if (sb) sb.onclick = () => openProfile(true);
+  $('#editReasons').onclick = openReasons;
+  $('#shareBtn').onclick = openShare;
+  renderCheckin();
   air($('#air'));
   const tick = () => {
     const e = elapsed(), d = Math.floor(e / D);
@@ -397,12 +463,32 @@ function viewHoy(root){
     if (nx){
       const prev = [...MILESTONES].reverse().find(m => m.ms <= e)?.ms || 0;
       const pc = Math.min(100, (e - prev) / (nx.ms - prev) * 100);
-      $('#nextMs').innerHTML = `<span class="label">Próximo hito · en ${durText(nx.ms - e)}</span><h3>${nx.t}</h3><p class="muted small" style="margin:6px 0 12px">${nx.d}</p><div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>`;
+      $('#nextMs').innerHTML = `<div class="row"><h3>${nx.t}</h3><span class="pill pill-pro">en ${durText(nx.ms - e)}</span></div><p class="muted small" style="margin:6px 0 12px">Próximo hito. ${nx.d}</p><div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>`;
     }
     const g = S.goal, pc = Math.min(100, moneySaved() / g.price * 100);
     $('#goalMini').innerHTML = `<div class="row small"><b>${esc(g.name)}</b><span class="num">${money(moneySaved(),0)} / ${money(g.price,0)}</span></div><div class="bar" style="margin-top:8px"><i style="width:${pc.toFixed(1)}%"></i></div>`;
   };
   tick(); timer = setInterval(tick, 1000);
+}
+
+function renderCheckin(){
+  const el = $('#checkin'); if (!el) return;
+  const today = S.checkins[dayKey(Date.now())], streak = checkinStreak();
+  if (today){
+    const m = MOODS.find(x => x.id === today);
+    el.innerHTML = `<div class="done-line"><span class="dot-ok">${CHECK}</span><div><b>Hoy te sientes: ${m.t.toLowerCase()}</b><div class="small muted">${streak > 1 ? `Llevas ${streak} días seguidos apuntando cómo estás.` : 'Mañana te volvemos a preguntar.'}</div></div></div>
+      ${today === 'dificil' ? '<button class="btn btn-sos btn-block" id="ciSos" style="margin-top:12px">Hacer 3 minutos de respiración</button>' : ''}`;
+    const b = $('#ciSos'); if (b) b.onclick = () => go('sos');
+    return;
+  }
+  el.innerHTML = `<h3 class="sec">¿Cómo llevas el día?${streak ? `<span class="muted">racha de ${streak}</span>` : ''}</h3>
+    <div class="mood">${MOODS.map(m => `<button data-m="${m.id}" aria-label="${m.t}">${m.svg}<span>${m.t}</span></button>`).join('')}</div>`;
+  el.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+    S.checkins[dayKey(Date.now())] = b.dataset.m; save();
+    try { navigator.vibrate?.(15); } catch(e){}
+    toast(b.dataset.m === 'dificil' ? 'Los días difíciles también cuentan. Estás aguantando.' : 'Apuntado. Sigue así.');
+    renderCheckin();
+  });
 }
 
 // Partículas de aire en la tarjeta principal
@@ -435,7 +521,7 @@ function viewSalud(root){
   }).join('');
   const got = MILESTONES.filter(m => e >= m.ms).length;
   root.innerHTML = `<section class="view">
-    <div><span class="label">Tu cuerpo se recupera</span><h2 style="font-size:2rem; margin-top:4px">${got} de ${MILESTONES.length} hitos conseguidos</h2></div>
+    <div class="vh"><h2>${got} de ${MILESTONES.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde el último cigarrillo.</p></div>
     <div class="card"><ol class="timeline">${items}</ol></div>
     ${S.pro ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
     <p class="foot-note">Fuentes: Organización Mundial de la Salud y CDC. Los plazos son aproximados y varían según la persona.</p>
@@ -446,15 +532,16 @@ function viewSalud(root){
 function viewSos(root){
   root.innerHTML = `<section class="view">
     <div class="card breath" id="breath">
-      <span class="label">Respiración 4 · 4 · 6</span>
+      <h3 class="sec">Respiración 4 · 4 · 6</h3>
       <div class="lung"><span class="halo"></span><span class="core" id="core">Pulsa empezar</span></div>
       <div class="phase" id="phase">Estás a salvo</div>
       <div class="countdown" id="cd">3:00</div>
       <div class="tip" id="tip">Un antojo dura de 3 a 5 minutos. Respira conmigo.</div>
+      ${S.reasons.length ? `<div class="reason-now" id="reasonNow">Lo haces por: ${esc(S.reasons[0].toLowerCase())}</div>` : ''}
       <button class="btn btn-sos btn-block" id="sosStart">Empezar 3 minutos</button>
     </div>
     <div class="card" id="logCard">
-      <span class="label">¿Qué lo ha provocado?</span>
+      <h3 class="sec">¿Qué lo ha provocado?</h3>
       <div class="chips" style="margin-top:10px" id="trig">${TRIGGERS.map(t => `<button class="chip" aria-pressed="false" data-t="${t}">${t}</button>`).join('')}</div>
       <div class="btn-row" style="margin-top:14px">
         <button class="btn btn-primary" id="okBtn">Lo he superado</button>
@@ -491,11 +578,16 @@ function startSos(){
     const [name, sec, sc] = seq[i % 3];
     phase.textContent = name; core.textContent = sec + ' s';
     core.style.transitionDuration = sec + 's'; core.style.transform = `scale(${sc})`;
+    try { navigator.vibrate?.(name === 'Exhala' ? [20, 60, 20] : 25); } catch(e){}
     i++; sos.phaseT = setTimeout(next, sec * 1000);
   };
   sos = {};
   next();
-  sos.tipT = setInterval(() => { tip.textContent = TIPS[ti++ % TIPS.length]; }, 12000);
+  let ri = 0;
+  sos.tipT = setInterval(() => {
+    tip.textContent = TIPS[ti++ % TIPS.length];
+    const rn = $('#reasonNow'); if (rn && S.reasons.length) rn.textContent = 'Lo haces por: ' + S.reasons[++ri % S.reasons.length].toLowerCase();
+  }, 12000);
   tip.textContent = TIPS[ti++];
   sos.cdT = setInterval(() => {
     const left = Math.max(0, end - Date.now());
@@ -513,8 +605,8 @@ function stopSos(){
 
 function viewDiario(root){
   if (!S.pro){
-    root.innerHTML = `<section class="view"><div><span class="label">Diario</span><h2 style="font-size:2rem; margin-top:4px">Conoce tus detonantes</h2></div>
-      <p class="muted" style="margin:0">Cada antojo que apuntas en SOS se guarda aquí. Aire te muestra qué lo provoca y a qué horas eres más vulnerable, para que puedas anticiparte.</p>
+    root.innerHTML = `<section class="view"><div class="vh"><h2>Conoce tus detonantes</h2>
+      <p>Cada antojo que apuntas en SOS se guarda aquí. Aire te muestra qué lo provoca y a qué horas eres más vulnerable, para que puedas anticiparte.</p></div>
       ${paywall('El diario con estadísticas forma parte de Aire Pro.')}</section>`;
     return bindPaywall(root);
   }
@@ -524,20 +616,24 @@ function viewDiario(root){
   const max = top[0]?.[1] || 1;
   const hrs = Array(24).fill(0); S.log.forEach(e => hrs[new Date(e.t).getHours()]++);
   const hmax = Math.max(1, ...hrs);
+  const moods14 = Array.from({length:14}, (_, i) => { const k = dayKey(Date.now() - (13 - i) * D); const m = S.checkins[k]; return `<i class="${m || ''}" title="${k}${m ? ' · ' + m : ''}"></i>`; }).join('');
   const list = S.log.slice(0, 30).map(e => `<li class="entry"><span class="tag ${e.ok ? '' : 'slip'}"></span>
     <div><b>${e.ok ? 'Antojo superado' : 'Desliz'}</b> <span class="muted small">· ${esc(e.trigger)}</span></div>
     <time datetime="${e.t}">${new Date(e.t).toLocaleString('es', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</time></li>`).join('');
   root.innerHTML = `<section class="view">
-    <div><span class="label">Diario</span><h2 style="font-size:2rem; margin-top:4px">${ok} antojos superados</h2>
-    <p class="muted" style="margin:6px 0 0">${slips ? slips + (slips === 1 ? ' desliz' : ' deslices') + ' apuntados. Siguen contando como aprendizaje.' : 'Sin deslices. Vas muy bien.'}</p></div>
-    <div class="card"><span class="label">Qué te provoca</span>
+    <div class="vh"><h2>${ok} antojos superados</h2>
+    <p>${slips ? slips + (slips === 1 ? ' desliz' : ' deslices') + ' apuntados. Siguen contando como aprendizaje.' : 'Sin deslices. Vas muy bien.'}</p></div>
+    <div class="card"><h3 class="sec">Cómo te has sentido <span class="muted">últimos 14 días</span></h3>
+      <div class="moods" role="img" aria-label="Estado de ánimo de los últimos 14 días">${moods14}</div>
+      <div class="legend"><span style="--c:var(--accent)">Bien</span><span style="--c:var(--gold)">Regular</span><span style="--c:var(--sos)">Difícil</span><span style="--c:var(--surface-2)">Sin apuntar</span></div></div>
+    <div class="card"><h3 class="sec">Qué te provoca</h3>
       <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px">
       ${top.length ? top.map(([t, n]) => `<div class="hbar"><span>${esc(t)}</span><div class="bar"><i style="width:${n / max * 100}%"></i></div><span class="num">${n}</span></div>`).join('') : '<p class="muted">Aún no hay antojos apuntados. Usa SOS cuando aparezca uno.</p>'}
       </div></div>
-    <div class="card"><span class="label">A qué hora aparecen</span>
+    <div class="card"><h3 class="sec">A qué hora aparecen</h3>
       <div class="hours" style="margin-top:14px" role="img" aria-label="Antojos por hora del día">${hrs.map((n, h) => `<i title="${h}:00 · ${n}" style="height:${n / hmax * 100}%; opacity:${n ? 1 : .25}"></i>`).join('')}</div>
       <div class="hours-axis"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>23 h</span></div></div>
-    <div class="card"><span class="label">Historial</span><ul class="entries" style="margin-top:6px">${list || '<li class="muted">Vacío</li>'}</ul></div>
+    <div class="card"><h3 class="sec">Historial</h3><ul class="entries" style="margin-top:6px">${list || '<li class="muted">Vacío</li>'}</ul></div>
   </section>`;
 }
 
@@ -548,7 +644,7 @@ function viewMetas(root){
   const R = 50, C = 2 * Math.PI * R;
   const badges = BADGES.map(b => { const got = b.ok(); return `<div class="badge ${got ? 'got' : ''}"><span class="medal">${b.m}</span><b>${b.t}</b><small>${b.s}</small></div>`; }).join('');
   root.innerHTML = `<section class="view">
-    <div><span class="label">Metas</span><h2 style="font-size:2rem; margin-top:4px">Tu dinero tiene destino</h2></div>
+    <div class="vh"><h2>Tu dinero tiene destino</h2><p>Lo que no gastas en tabaco, a algo que te ilusione.</p></div>
     <div class="card" style="${S.pro ? '' : 'filter:blur(3px); opacity:.6'}" ${S.pro ? '' : 'aria-hidden="true"'}>
       <div class="goal">
         <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
@@ -563,13 +659,13 @@ function viewMetas(root){
         <div class="field"><label for="gPrice">Precio (${esc(S.profile.currency)})</label><input id="gPrice" type="number" min="1" step="1" inputmode="numeric" value="${g.price}"></div></div>
         <button class="btn btn-ghost btn-block" id="gSave" style="margin-top:12px">Guardar meta</button>` : ''}
     </div>
-    <div class="card"><div class="row"><span class="label">Proyección de ahorro</span></div>
+    <div class="card"><div class="row"><h3 class="sec">Proyección de ahorro</h3></div>
       <div class="stats" style="margin-top:12px">
         <div class="stat"><b class="num">${money(perDayMoney * 30, 0)}</b><span>en un mes</span></div>
         <div class="stat"><b class="num">${money(perDayMoney * 182, 0)}</b><span>en 6 meses</span></div>
         <div class="stat"><b class="num">${money(perDayMoney * 365, 0)}</b><span>en un año</span></div>
       </div></div>
-    <div><span class="label">Logros · ${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</span></div>
+    <h3 class="sec">Logros <span class="muted">${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</span></h3>
     <div class="badges">${badges}</div>
     ${S.pro ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
   </section>`;
@@ -671,15 +767,17 @@ function openProfile(fromDemo){
         <div class="field"><label for="fPrice">Precio del paquete</label><input id="fPrice" type="number" min="0.1" step="0.01" required inputmode="decimal" value="${p.packPrice}"></div>
         <div class="field"><label for="fCur">Moneda</label><select id="fCur">${cur.map(c => `<option ${c === p.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
       </div>
+      ${fromDemo ? `<div class="field"><label>Por qué lo dejas <span class="muted" style="font-weight:400">(elige las que quieras)</span></label><div class="chips" id="fReasons">${REASONS.map(r => `<button type="button" class="chip" aria-pressed="false">${r}</button>`).join('')}</div></div>` : ''}
       <button class="btn btn-primary btn-block" type="submit">${fromDemo ? 'Empezar mi contador' : 'Guardar'}</button>
       <button class="btn btn-ghost btn-block" type="button" data-close>Cancelar</button>
     </form>`);
+  document.querySelectorAll('#fReasons .chip').forEach(c => c.onclick = () => c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'));
   $('#pf').onsubmit = ev => {
     ev.preventDefault();
     const q = new Date($('#fQuit').value);
     if (isNaN(q) || q > new Date()) return toast('La fecha del último cigarrillo no puede estar en el futuro.');
     const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:p.years};
-    if (fromDemo){ S = {demo:false, pro:S.pro, license:S.license, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[]}; }
+    if (fromDemo){ S = {demo:false, pro:S.pro, license:S.license, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
     else S.profile = np;
     save(); closeSheet(); toast(fromDemo ? 'Tu contador ha empezado. ¡A por ello!' : 'Datos guardados'); go('hoy');
   };
@@ -687,6 +785,8 @@ function openProfile(fromDemo){
 function openSettings(){
   sheet(`<h2>Ajustes</h2>
     <button class="btn btn-ghost btn-block" id="stProfile">${S.demo ? 'Crear mi plan' : 'Editar mis datos'}</button>
+    <button class="btn btn-ghost btn-block" id="stReasons">Mis razones para dejarlo</button>
+    <button class="btn btn-ghost btn-block" id="stBackup">Copia de seguridad</button>
     <button class="btn btn-ghost btn-block" id="stTheme">Tema: ${S.theme === 'dark' ? 'oscuro' : S.theme === 'light' ? 'claro' : 'automático'}</button>
     ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
     <button class="btn btn-ghost btn-block" id="stReset" style="color:var(--sos); border-color:var(--sos)">Borrar todos mis datos</button>
@@ -695,12 +795,94 @@ function openSettings(){
     <p class="foot-note">Aire · una app de KREA Digital Studio<br><a href="../legal/#aviso" target="_blank" rel="noopener">Aviso legal</a> · <a href="../legal/#privacidad" target="_blank" rel="noopener">Privacidad</a> · <a href="../legal/#condiciones" target="_blank" rel="noopener">Condiciones</a></p>`);
   $('#stProfile').onclick = () => { closeSheet(); openProfile(S.demo); };
   $('#stTheme').onclick = () => { cycleTheme(); openSettings(); };
+  $('#stReasons').onclick = openReasons;
+  $('#stBackup').onclick = openBackup;
   $('#stReset').onclick = () => {
     $('#stConfirm').innerHTML = `<div class="confirm"><b>¿Borrar todo?</b><span class="small">Se eliminarán tu contador, tu diario y tu meta. No se puede deshacer.</span>
       <div class="btn-row"><button class="btn btn-ghost" id="rsNo">Mantener</button><button class="btn btn-sos" id="rsYes">Borrar</button></div></div>`;
     $('#rsNo').onclick = () => $('#stConfirm').innerHTML = '';
     $('#rsYes').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = demoState(); closeSheet(); applyTheme(); toast('Datos borrados'); go('hoy'); };
   };
+}
+function openReasons(){
+  const all = [...new Set([...REASONS, ...S.reasons])];
+  sheet(`<h2>Por qué lo dejas</h2>
+    <p class="muted" style="margin:0">Elige tus motivos. Aire te los recordará durante los antojos.</p>
+    <div class="chips" id="rsList">${all.map(r => `<button type="button" class="chip" aria-pressed="${S.reasons.includes(r)}">${esc(r)}</button>`).join('')}</div>
+    <div class="code-row" style="margin:0"><input id="rsNew" maxlength="30" placeholder="Escribe otro motivo" aria-label="Nuevo motivo" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" id="rsAdd">Añadir</button></div>
+    <button class="btn btn-primary btn-block" id="rsSave">Guardar</button>
+    <button class="btn btn-ghost btn-block" data-close>Cancelar</button>`);
+  const bind = () => document.querySelectorAll('#rsList .chip').forEach(c => c.onclick = () => c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'));
+  bind();
+  $('#rsAdd').onclick = () => {
+    const v = $('#rsNew').value.trim(); if (!v) return;
+    $('#rsList').insertAdjacentHTML('beforeend', `<button type="button" class="chip" aria-pressed="true">${esc(v)}</button>`);
+    $('#rsNew').value = ''; bind();
+  };
+  $('#rsSave').onclick = () => {
+    S.reasons = [...document.querySelectorAll('#rsList .chip[aria-pressed="true"]')].map(c => c.textContent);
+    save(); closeSheet(); toast('Motivos guardados'); render();
+  };
+}
+function openBackup(){
+  let code = '';
+  try { code = btoa(unescape(encodeURIComponent(JSON.stringify({...S, theme:undefined})))); } catch(e){}
+  sheet(`<h2>Copia de seguridad</h2>
+    <p class="muted" style="margin:0">Tus datos solo viven en este móvil. Guarda este código en tus notas o envíatelo para recuperarlos si cambias de teléfono.</p>
+    <textarea class="code" id="bkOut" readonly aria-label="Tu código de copia de seguridad">${code}</textarea>
+    <button class="btn btn-primary btn-block" id="bkCopy">Copiar código</button>
+    <label for="bkIn" class="small" style="font-weight:600">Restaurar desde un código</label>
+    <textarea class="code" id="bkIn" placeholder="Pega aquí tu código"></textarea>
+    <button class="btn btn-ghost btn-block" id="bkLoad">Restaurar</button>
+    <div id="bkConfirm"></div>
+    <button class="btn btn-ghost btn-block" data-close>Cerrar</button>`);
+  $('#bkCopy').onclick = () => {
+    const ta = $('#bkOut');
+    navigator.clipboard?.writeText(code).then(() => toast('Código copiado'), () => { ta.select(); toast('Selecciona y copia el código'); }) ?? (ta.select(), toast('Selecciona y copia el código'));
+  };
+  $('#bkLoad').onclick = () => {
+    let data;
+    try { data = JSON.parse(decodeURIComponent(escape(atob($('#bkIn').value.trim())))); } catch(e){}
+    if (!data || !data.profile || !data.profile.quitAt) return toast('Ese código no es válido. Cópialo completo, sin espacios.');
+    $('#bkConfirm').innerHTML = `<div class="confirm"><b>¿Sustituir tus datos actuales?</b><span class="small">Se cargará el contador desde el ${new Date(data.profile.quitAt).toLocaleDateString('es')}.</span>
+      <div class="btn-row"><button class="btn btn-ghost" id="bkNo">Cancelar</button><button class="btn btn-sos" id="bkYes">Restaurar</button></div></div>`;
+    $('#bkNo').onclick = () => $('#bkConfirm').innerHTML = '';
+    $('#bkYes').onclick = () => { S = {...data, theme:S.theme, reasons:data.reasons || [], checkins:data.checkins || {}}; save(); closeSheet(); toast('Datos restaurados'); go('hoy'); };
+  };
+}
+
+// ===== Compartir progreso (imagen) =====
+async function drawShareCard(){
+  const W = 1080, Hh = 1350, c = document.createElement('canvas'); c.width = W; c.height = Hh;
+  const x = c.getContext('2d');
+  try { await document.fonts?.ready; } catch(e){}
+  const g = x.createLinearGradient(0, 0, W, Hh); g.addColorStop(0, '#0E7C66'); g.addColorStop(1, '#0A3A30');
+  x.fillStyle = g; x.fillRect(0, 0, W, Hh);
+  x.fillStyle = 'rgba(255,255,255,.10)';
+  for (let i = 0; i < 40; i++){ x.beginPath(); x.arc((i * 263) % W, (i * 517) % Hh, 4 + (i % 5) * 3, 0, 7); x.fill(); }
+  const disp = '"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif', body = 'Figtree, "Helvetica Neue", Arial, sans-serif';
+  const d = Math.floor(elapsed() / D);
+  x.fillStyle = '#FFFFFF'; x.textBaseline = 'alphabetic';
+  x.font = `800 64px ${disp}`; x.fillText('Aire', 90, 150);
+  x.font = `600 46px ${body}`; x.globalAlpha = .9; x.fillText(`${S.profile.name || 'Llevo'} lleva sin fumar`.replace(/^Llevo lleva/, 'Llevo'), 90, 400); x.globalAlpha = 1;
+  x.font = `800 ${d > 99 ? 330 : 420}px ${disp}`; x.fillText(String(d), 80, 760);
+  x.font = `700 92px ${disp}`; x.fillText(d === 1 ? 'día' : 'días', 90, 880);
+  x.fillStyle = 'rgba(255,255,255,.14)'; x.fillRect(90, 950, W - 180, 2);
+  x.fillStyle = '#FFFFFF';
+  const stats = [[money(moneySaved(), 0), 'ahorrado'], [int(cigsAvoided()), 'cigarrillos evitados'], [lifeText(), 'de vida recuperada']];
+  stats.forEach(([v, l], i) => { const sx = 90 + i * 310; x.font = `800 64px ${disp}`; x.fillText(v, sx, 1060); x.font = `500 32px ${body}`; x.globalAlpha = .82; x.fillText(l, sx, 1110); x.globalAlpha = 1; });
+  x.font = `600 34px ${body}`; x.globalAlpha = .8; x.fillText('aire.kreadigitalstudio.es', 90, 1260); x.globalAlpha = 1;
+  return new Promise(r => c.toBlob(r, 'image/png'));
+}
+async function openShare(){
+  sheet(`<h2>Comparte tu progreso</h2><p class="muted" style="margin:0">Contarlo te compromete más. Preparando tu imagen…</p><div id="shWrap" style="display:flex; flex-direction:column; gap:12px"></div><button class="btn btn-ghost btn-block" data-close>Cerrar</button>`);
+  const blob = await drawShareCard(); if (!blob) return toast('No se pudo crear la imagen.');
+  const url = URL.createObjectURL(blob), file = new File([blob], 'aire-progreso.png', {type:'image/png'});
+  const canShare = !!(navigator.canShare && navigator.canShare({files:[file]}));
+  const w = $('#shWrap'); if (!w) return;
+  w.previousElementSibling.textContent = canShare ? 'Contarlo te compromete más. Compártelo en tus redes o con quien te apoya.' : 'Contarlo te compromete más. Mantén pulsada la imagen para guardarla y compartirla.';
+  w.innerHTML = `<img class="share-img" src="${url}" alt="Tarjeta con tus días sin fumar y tu ahorro">${canShare ? '<button class="btn btn-primary btn-block" id="shGo">Compartir</button>' : ''}`;
+  const b = $('#shGo'); if (b) b.onclick = () => navigator.share({files:[file], text:`Llevo ${Math.floor(elapsed() / D)} días sin fumar con Aire.`}).catch(() => {});
 }
 function sheet(html){
   $('#sheetRoot').innerHTML = `<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
