@@ -68,8 +68,9 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 
 /* Contador principal */
 .hero{position:relative; overflow:hidden; background:var(--hero); color:var(--on-hero); border:0; padding:22px 20px 20px; isolation:isolate}
-.hero .hero-bg{position:absolute; inset:0; z-index:-1; background:url('../img/portada-fusionada-900.webp') right -60px top 0 / auto 118% no-repeat}
-.hero .hero-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(100deg, var(--hero) 36%, color-mix(in srgb, var(--hero) 45%, transparent) 60%, color-mix(in srgb, var(--hero) 8%, transparent))}
+.hero{padding-top:150px}
+.hero .hero-bg{position:absolute; inset:0 0 auto 0; height:190px; z-index:-1; background:url('../img/portada-fusionada-900.webp') 56% 24% / cover no-repeat}
+.hero .hero-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--hero) 70%, transparent) 75%, var(--hero) 100%)}
 .hero-lead{font-weight:600; font-size:1rem; opacity:.92}
 .hero .label{color:inherit; opacity:.8}
 .hero canvas{position:absolute; inset:0; width:100%; height:100%; opacity:.35; pointer-events:none}
