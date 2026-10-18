@@ -12,7 +12,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 ## Decisiones tomadas
 - Se trabaja **solo desde Claude Code**, en una única sesión (dos sesiones a la vez se pisan los cambios).
 - Aire es un proyecto **separado de Krea Velvet**: repositorio propio `kikeotero7/aire`. No mezclar.
-- Modelo: **7 días de prueba con todo incluido** desde la primera apertura; después la app se bloquea (el SOS sigue gratis) hasta comprar.
+- Modelo: **prueba con todo incluido** (15 días durante la fase de prueba con conocidos; volver a 7 al comercializar: `trialDays` en `app.html` y textos de web y condiciones) desde la primera apertura; después la app se bloquea (el SOS sigue gratis) hasta comprar.
 - **Códigos de invitación** para enseñarla a conocidos: en `CONFIG.inviteHashes` de `app.html` se guarda solo la huella del código, nunca el código. Para crear uno nuevo, pídeselo a Claude.
 - Precio: **pago único 9,99 €**, sin suscripción.
   Lanzamiento a **6,99 € hasta el 30/11/2026**, sin precio tachado (descuento `LANZAMIENTO` en Lemon Squeezy con la misma fecha).
@@ -64,6 +64,6 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - Airi habla en voz alta y usa el nombre del usuario; ficha inicial con edad y años fumando.
 - Modo juego, reto del día, logros bronce/plata/oro, instalación con un toque y vista previa en WhatsApp.
 - Código de invitación: AIRE2026 (solo su huella en el código).
-- **Siguiente:** prueba con conocidos SIN código durante 7 días; el día 8 (app bloqueada) Kike les da AIRE2026 para seguir. Si gusta: alta de autónomo, Google Play Console (25 $ pago único) y cobro. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
+- **Siguiente:** prueba con conocidos SIN código durante 15 días, recogiendo opiniones; después se decide si se usa AIRE2026 y se pasa a cobrar. Si gusta: alta de autónomo, Google Play Console (25 $ pago único) y cobro. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
 
 Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.
