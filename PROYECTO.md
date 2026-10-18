@@ -52,6 +52,8 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - [ ] **Portada:** silueta de mujer con bosque en los pulmones (y versión con hombre espalda con espalda, ya generada en Figma "Aire · Propuestas de foto de portada"). Falta exportarla a resolución completa y colocarla en `.hero-visual` añadiendo la clase `has-photo`.
 
 ## Imágenes y mascota
+- **Logotipo:** pulmones de papel (`img/logo-pulmones.webp`) en la cabecera de web, app y legal. El icono del móvil sigue siendo el plano (se reconoce mejor en pequeño).
+- **Modo juego:** puntos (10/día sin fumar, 15/antojo superado, 5/check-in, 10/reto, 20/logro) y 7 niveles de bosque: Semilla, Brote, Hoja, Rama, Árbol, Bosque y Selva. Reto del día (14 retos que rotan). Logros en bronce, plata y oro con Airi. Tocar a Airi en Hoy le hace saltar y dar ánimos.
 - **Airi** (mascota 3D verde): aparece con mensajes en bienvenida, saludo diario, check-in, SOS, antojo superado, nuevos logros e hitos, y último día de prueba. Imágenes en `img/airi-*.webp`.
 - **Pulmones de papel** (`img/pulmones.webp`): en la sección de salud de la web y en la pestaña Salud, donde se colorean según los hitos conseguidos.
 - Originales en `img/src/`. Propuestas descartadas o pendientes en `store/fotos-propuesta/`.

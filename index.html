@@ -170,12 +170,13 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
   nav.top .btn-ghost{display:none}
 }
 @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+.brand .logo{width:36px; height:36px; border-radius:11px; object-fit:cover; box-shadow:0 0 0 1px var(--line)}
 </style>
 </head>
 <body>
 
 <nav class="top"><div class="wrap">
-  <a class="brand" href="#inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--accent)"/><path d="M15 9v9c0 3-2 5-5 5-2 0-2-2-2-4 0-4 3-8 7-10zM17 9v9c0 3 2 5 5 5 2 0 2-2 2-4 0-4-3-8-7-10z" fill="var(--on-accent)"/></svg>Aire</a>
+  <a class="brand" href="#inicio"><img class="logo" src="img/logo-pulmones.webp" width="36" height="36" alt="">Aire</a>
   <div class="btns"><a class="btn btn-ghost" href="#precio">Precio</a><a class="btn btn-primary" href="app/">Abrir la app</a></div>
 </div></nav>
 
