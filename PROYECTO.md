@@ -49,4 +49,11 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - [ ] **Google Play:** cuenta de Play Console (personal), paquete con PWABuilder, prueba cerrada 12 personas × 14 días. Guía completa en `GOOGLE_PLAY.md`.
 - [ ] Alojar las tipografías en el propio sitio antes de enviar el formulario de seguridad de datos de Google Play.
 
+- [ ] **Portada:** silueta de mujer con bosque en los pulmones (y versión con hombre espalda con espalda, ya generada en Figma "Aire · Propuestas de foto de portada"). Falta exportarla a resolución completa y colocarla en `.hero-visual` añadiendo la clase `has-photo`.
+
+## Imágenes y mascota
+- **Airi** (mascota 3D verde): aparece con mensajes en bienvenida, saludo diario, check-in, SOS, antojo superado, nuevos logros e hitos, y último día de prueba. Imágenes en `img/airi-*.webp`.
+- **Pulmones de papel** (`img/pulmones.webp`): en la sección de salud de la web y en la pestaña Salud, donde se colorean según los hitos conseguidos.
+- Originales en `img/src/`. Propuestas descartadas o pendientes en `store/fotos-propuesta/`.
+
 Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.

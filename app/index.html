@@ -231,6 +231,28 @@ h3.sec span{font-family:var(--body); font-size:.85rem; font-weight:600}
 .share-img{width:100%; max-width:320px; align-self:center; border-radius:18px; box-shadow:0 18px 40px -18px color-mix(in srgb, var(--ink) 50%, transparent)}
 textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:10px 12px; font-family:var(--mono); font-size:.78rem; resize:vertical}
 .lung .core{font-size:1.25rem}
+/* Airi, la mascota */
+.airi-pop{position:fixed; left:0; right:0; bottom:calc(84px + env(safe-area-inset-bottom,0px)); z-index:45; display:flex; justify-content:center; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); pointer-events:none}
+.airi-card{pointer-events:auto; width:100%; max-width:448px; display:grid; grid-template-columns:72px minmax(0,1fr) auto; gap:12px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:10px 12px 10px 10px; box-shadow:0 18px 40px -16px color-mix(in srgb, var(--ink) 45%, transparent); animation:airiIn .5s cubic-bezier(.2,1.3,.4,1) both}
+.airi-card.out{animation:airiOut .3s ease forwards}
+.airi-card img{width:72px; height:72px; border-radius:18px; object-fit:cover; background:var(--accent-soft)}
+.airi-card b{display:block; font-family:var(--display); font-size:1.05rem; line-height:1.15}
+.airi-card p{margin:2px 0 0; font-size:.88rem; color:var(--muted)}
+.airi-card .airi-act{margin-top:8px; min-height:36px; padding:0 14px; font-size:.85rem}
+.airi-x{width:32px; height:32px; border-radius:10px; border:0; background:var(--surface-2); color:var(--muted); font-size:1.1rem; line-height:1; align-self:start}
+@keyframes airiIn{from{transform:translateY(40px) scale(.9); opacity:0} to{transform:none; opacity:1}}
+@keyframes airiOut{to{transform:translateY(30px); opacity:0}}
+.airi-hero{display:grid; grid-template-columns:96px minmax(0,1fr); gap:14px; align-items:center}
+.airi-hero img{width:96px; height:96px; border-radius:24px; object-fit:cover; background:var(--accent-soft)}
+.airi-hero b{font-family:var(--display); font-size:1.2rem; display:block}
+.airi-hero p{margin:4px 0 0; color:var(--muted); font-size:.92rem}
+.sheet .airi-welcome{width:110px; height:110px; border-radius:28px; object-fit:cover; align-self:center; background:var(--accent-soft)}
+/* Pulmones que se llenan de vida con los hitos */
+.lungs{position:relative; max-width:300px; margin:0 auto; aspect-ratio:600/533}
+.lungs img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; border-radius:20px}
+.lungs .gray{filter:grayscale(1) brightness(1.08); opacity:.5}
+.lungs .color{transition:clip-path 1.2s cubic-bezier(.2,.8,.2,1)}
+.lungs-cap{text-align:center; font-weight:700; color:var(--accent); margin-top:8px}
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important; transition:none !important}
 }
@@ -398,6 +420,49 @@ function checkinStreak(){
   while (S.checkins[dayKey(t)]) { n++; t -= D; }
   return n;
 }
+// Airi aparece en momentos clave del uso: logros, hitos, check-in, SOS y saludo diario
+const AIRI = { feliz:'../img/airi-feliz.webp', celebra:'../img/airi-celebra.webp', medalla:'../img/airi-medalla.webp' };
+const AIRI_SALUDOS = [
+  'Cada hora sin fumar cuenta. Hoy también.',
+  'Tus pulmones ya están trabajando para ti.',
+  'Si llega un antojo, respiramos juntos 3 minutos.',
+  'Lo estás haciendo mejor de lo que crees.',
+  'Piensa en lo que harás con lo que llevas ahorrado.'
+];
+let airiQ = [], airiOn = false, airiT;
+function airi(pose, title, text, action){
+  airiQ.push({pose, title, text, action});
+  if (!airiOn) airiNext();
+}
+function airiNext(){
+  const it = airiQ.shift(); if (!it){ airiOn = false; return; }
+  airiOn = true;
+  let host = $('#airiRoot'); if (!host){ host = document.createElement('div'); host.id = 'airiRoot'; document.body.appendChild(host); }
+  host.innerHTML = `<div class="airi-pop" role="status"><div class="airi-card"><img src="${AIRI[it.pose] || AIRI.feliz}" alt="Airi"><div><b>${esc(it.title)}</b><p>${esc(it.text)}</p>${it.action ? `<button class="btn btn-primary airi-act">${esc(it.action.label)}</button>` : ''}</div><button class="airi-x" aria-label="Cerrar">×</button></div></div>`;
+  try { navigator.vibrate?.([10, 40, 10]); } catch(e){}
+  const close = () => { clearTimeout(airiT); const c = host.querySelector('.airi-card'); if (!c) return airiNext(); c.classList.add('out'); setTimeout(() => { host.innerHTML = ''; airiNext(); }, 280); };
+  host.querySelector('.airi-x').onclick = close;
+  const a = host.querySelector('.airi-act'); if (a) a.onclick = () => { close(); it.action.run(); };
+  airiT = setTimeout(close, it.action ? 9000 : 5500);
+}
+// Comprueba si hay logros o hitos nuevos desde la última vez y los celebra
+function airiCheck(){
+  const e = elapsed();
+  const badgesNow = BADGES.filter(b => b.ok()).map(b => b.id);
+  const msNow = MILESTONES.filter(m => e >= m.ms).length;
+  if (!S.seenBadges){ S.seenBadges = badgesNow; S.seenMs = msNow; save(); return; }
+  const nuevos = badgesNow.filter(id => !S.seenBadges.includes(id));
+  nuevos.forEach(id => { const b = BADGES.find(x => x.id === id); airi('medalla', `¡Nuevo logro: ${b.t}!`, `${b.s}. Lo tienes en Metas.`); });
+  if (msNow > (S.seenMs || 0)){ const m = MILESTONES[msNow - 1]; airi('celebra', `Nuevo hito: ${m.t}`, m.d); }
+  if (nuevos.length || msNow !== S.seenMs){ S.seenBadges = badgesNow; S.seenMs = msNow; save(); }
+  const hoyK = dayKey(Date.now());
+  if (S.airiDay !== hoyK){
+    S.airiDay = hoyK; save();
+    const d = Math.floor(e / D);
+    if (!S.pro && trialLeft() && trialDaysLeft() === 1) airi('feliz', 'Último día de prueba', 'Mañana se bloquea Aire. Puedes desbloquearla para siempre.', {label:'Ver opciones', run:openPro});
+    else if (!nuevos.length && msNow === S.seenMs) airi('feliz', d ? `¡Hola! Llevas ${d} ${d === 1 ? 'día' : 'días'}` : '¡Hola! Empieza tu día sin humo', AIRI_SALUDOS[Math.floor(Date.now() / D) % AIRI_SALUDOS.length]);
+  }
+}
 const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Otro'];
 const TIPS = [
   'Bebe un vaso de agua fría a sorbos lentos.',
@@ -441,6 +506,7 @@ function render(){
   statusPill();
   $('#view').innerHTML = '';
   (!hasPro() && tab !== 'sos' ? viewLocked : VIEWS[tab])($('#view'));
+  if (hasPro() && !S.demo) airiCheck();
   window.scrollTo({top:0});
 }
 function go(t){ tab = t; try { history.replaceState(null, '', '#' + t); } catch(e){} render(); }
@@ -450,7 +516,7 @@ function viewLocked(root){
   root.innerHTML = `<section class="view">
     <div class="card locked-hero">
       <h3 class="sec">${S.demo ? 'Tu prueba gratis ha terminado' : `${esc(S.profile.name)}, tu prueba gratis ha terminado`}</h3>
-      <p class="muted" style="margin:6px 0 14px">Mira todo lo que llevas conseguido. Desbloquea Aire para seguir contando.</p>
+      <div class="airi-hero" style="margin:10px 0 14px"><img src="${AIRI.feliz}" alt="Airi"><p style="margin:0">Mira todo lo que llevas conseguido. Desbloquea Aire y seguimos juntos.</p></div>
       <div class="row" style="align-items:flex-end; flex-wrap:wrap"><div><span class="big">${d}</span> <b style="font-family:var(--display); font-size:1.3rem">${d === 1 ? 'día' : 'días'} sin fumar</b></div></div>
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b class="num">${money(moneySaved())}</b><span>ahorrado</span></div>
@@ -545,7 +611,10 @@ function renderCheckin(){
   el.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
     S.checkins[dayKey(Date.now())] = b.dataset.m; save();
     try { navigator.vibrate?.(15); } catch(e){}
-    toast(b.dataset.m === 'dificil' ? 'Los días difíciles también cuentan. Estás aguantando.' : 'Apuntado. Sigue así.');
+    const m = b.dataset.m;
+    if (m === 'bien') airi('celebra', '¡Así se hace!', 'Un día más sumando. Estoy orgulloso de ti.');
+    else if (m === 'regular') airi('feliz', 'Un día normal también suma', 'No hace falta que sea perfecto. Sigue contando conmigo.');
+    else airi('feliz', 'Estoy contigo', 'Los días difíciles pasan. ¿Respiramos juntos 3 minutos?', {label:'Respirar con Airi', run:() => go('sos')});
     renderCheckin();
   });
 }
@@ -581,6 +650,8 @@ function viewSalud(root){
   const got = MILESTONES.filter(m => e >= m.ms).length;
   root.innerHTML = `<section class="view">
     <div class="vh"><h2>${got} de ${MILESTONES.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde el último cigarrillo.</p></div>
+    <div class="card"><div class="lungs" role="img" aria-label="Tus pulmones se recuperan: ${Math.round(got / MILESTONES.length * 100)} %"><img class="gray" src="../img/pulmones.webp" alt=""><img class="color" src="../img/pulmones.webp" alt="" style="clip-path:inset(${100 - Math.round(got / MILESTONES.length * 100)}% 0 0 0)"></div>
+      <p class="lungs-cap">Tus pulmones se recuperan: ${Math.round(got / MILESTONES.length * 100)} %</p></div>
     <div class="card"><ol class="timeline">${items}</ol></div>
     ${hasPro() ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
     <p class="foot-note">Fuentes: Organización Mundial de la Salud y CDC. Los plazos son aproximados y varían según la persona.</p>
@@ -616,7 +687,7 @@ function viewSos(root){
     c.setAttribute('aria-pressed', 'true'); trig = c.dataset.t;
   });
   $('#sosStart').onclick = startSos;
-  $('#okBtn').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'craving', trigger:trig || 'Otro', ok:true}); save(); toast('Antojo superado. Lo has guardado en tu diario.'); go('hoy'); };
+  $('#okBtn').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'craving', trigger:trig || 'Otro', ok:true}); save(); airi('celebra', '¡Antojo superado!', `Ya van ${S.log.filter(x => x.ok).length}. Cada uno te hace más fuerte.`); go('hoy'); };
   $('#slipBtn').onclick = () => {
     $('#slipConfirm').innerHTML = `<div class="confirm" style="margin-top:12px">
       <b>Un desliz no borra tu progreso.</b>
@@ -651,7 +722,7 @@ function startSos(){
   sos.cdT = setInterval(() => {
     const left = Math.max(0, end - Date.now());
     cd.textContent = `${Math.floor(left / 60e3)}:${pad(Math.floor(left % 60e3 / 1e3))}`;
-    if (!left){ stopSos(); phase.textContent = '¡Lo has conseguido!'; core.textContent = '3 min'; core.style.transform = 'scale(1)'; btn.textContent = 'Otra ronda'; btn.onclick = startSos; $('#logCard').scrollIntoView({behavior:'smooth', block:'center'}); }
+    if (!left){ stopSos(); airi('celebra', '¡3 minutos superados!', 'El antojo ya ha perdido fuerza. Apúntalo abajo.'); phase.textContent = '¡Lo has conseguido!'; core.textContent = '3 min'; core.style.transform = 'scale(1)'; btn.textContent = 'Otra ronda'; btn.onclick = startSos; $('#logCard').scrollIntoView({behavior:'smooth', block:'center'}); }
   }, 250);
   try { navigator.wakeLock?.request('screen').then(l => { if (sos) sos.lock = l; }).catch(() => {}); } catch(e){}
 }
@@ -724,7 +795,7 @@ function viewMetas(root){
         <div class="stat"><b class="num">${money(perDayMoney * 182, 0)}</b><span>en 6 meses</span></div>
         <div class="stat"><b class="num">${money(perDayMoney * 365, 0)}</b><span>en un año</span></div>
       </div></div>
-    <h3 class="sec">Logros <span class="muted">${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</span></h3>
+    <div class="card airi-hero"><img src="${AIRI.medalla}" alt="Airi con una medalla"><div><b>Logros: ${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</b><p>${BADGES.filter(b => b.ok()).length === BADGES.length ? '¡Los tienes todos! Airi está orgulloso de ti.' : `El siguiente: ${BADGES.find(b => !b.ok()).t}. ¡Vamos a por él!`}</p></div></div>
     <div class="badges">${badges}</div>
     ${hasPro() ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
   </section>`;
@@ -815,7 +886,7 @@ function openProfile(fromDemo){
   const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:5} : S.profile;
   const dt = new Date(new Date(p.quitAt).getTime() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
   const cur = ['EUR','USD','MXN','COP','ARS','CLP','PEN','GBP'];
-  sheet(`<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
+  sheet(`${fromDemo ? `<img class="airi-welcome" src="${AIRI.feliz}" alt="Airi, la mascota de Aire">` : ''}<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
     <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
     <form id="pf" style="display:flex; flex-direction:column; gap:12px">
       <div class="field"><label for="fName">Tu nombre</label><input id="fName" required maxlength="24" value="${esc(p.name)}" placeholder="Cómo quieres que te llamemos"></div>
@@ -838,7 +909,10 @@ function openProfile(fromDemo){
     const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:p.years};
     if (fromDemo){ S = {demo:false, pro:S.pro, proVia:S.proVia, license:S.license, trialStart:S.trialStart, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
     else S.profile = np;
-    save(); closeSheet(); toast(fromDemo ? 'Tu contador ha empezado. ¡A por ello!' : 'Datos guardados'); go('hoy');
+    if (fromDemo){ S.seenBadges = undefined; S.airiDay = dayKey(Date.now()); }
+    save(); closeSheet();
+    if (fromDemo) airi('celebra', `¡Bienvenido, ${np.name}!`, 'Soy Airi. Te acompañaré en cada logro y en cada antojo.'); else toast('Datos guardados');
+    go('hoy');
   };
 }
 function openSettings(){

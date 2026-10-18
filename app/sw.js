@@ -1,6 +1,6 @@
 // Aire · funciona sin conexión: guarda la app en caché y la sirve aunque no haya red.
-const CACHE = 'aire-v2';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+const CACHE = 'aire-v3';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', '../img/airi-feliz.webp', '../img/airi-celebra.webp', '../img/airi-medalla.webp', '../img/pulmones.webp'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
