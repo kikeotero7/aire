@@ -56,6 +56,8 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 .icon-btn svg{width:20px; height:20px}
 .pill{display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:.74rem; font-weight:700; letter-spacing:.04em}
 .pill-demo{background:var(--gold-soft); color:var(--gold)}
+.pill-end{background:var(--sos-soft); color:var(--sos)}
+.locked-hero .big{font-family:var(--display); font-weight:800; font-size:clamp(3.6rem, 18vw, 5rem); line-height:.9; letter-spacing:-.05em; color:var(--accent)}
 .pill-pro{background:var(--accent-soft); color:var(--accent)}
 
 .view{display:flex; flex-direction:column; gap:14px; padding-top:6px; animation:fade .35s ease}
@@ -76,7 +78,8 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 
 .stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
 .stat{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 12px; min-width:0; display:flex; flex-direction:column; gap:4px}
-.stat b{font-family:var(--display); font-size:1.35rem; font-weight:700; letter-spacing:-.02em; overflow-wrap:anywhere}
+.stat b{font-family:var(--display); font-size:clamp(1.05rem, 5.2vw, 1.35rem); font-weight:700; letter-spacing:-.02em; white-space:nowrap}
+a{color:var(--accent)}
 .stat span{font-size:.76rem; color:var(--muted); line-height:1.25}
 
 .sos-btn{display:flex; align-items:center; gap:14px; width:100%; text-align:left; background:var(--sos); color:var(--on-sos); border:0; border-radius:var(--r); padding:18px 20px; box-shadow:0 10px 30px -12px color-mix(in srgb, var(--sos) 70%, transparent)}
@@ -274,7 +277,8 @@ const CONFIG = {
   launchCode: 'LANZAMIENTO', // descuento de 3 € en Lemon Squeezy que caduca la misma fecha
   checkoutUrl: '',         // Enlace de compra de Lemon Squeezy: https://TU-TIENDA.lemonsqueezy.com/buy/XXXX
   apiBase: '',             // URL del servidor de licencias: https://aire-licencias.TU-CUENTA.workers.dev
-  demoCode: 'AIRE-DEMO',   // Solo funciona mientras checkoutUrl/apiBase estén vacíos (vista previa)
+  trialDays: 7,            // días de prueba con todo incluido desde la primera apertura
+  inviteHashes: ['gmtoc5gj3o'], // huellas de los códigos de invitación (el código no se guarda en claro)
   minPerCig: 11            // minutos de vida estimados por cigarrillo (Shaw et al., BMJ 2000)
 };
 const LIVE = !!(CONFIG.checkoutUrl && CONFIG.apiBase);
@@ -318,9 +322,22 @@ function load(){
 }
 let S = load();
 S.reasons = S.reasons || []; S.checkins = S.checkins || {};
+if (!S.trialStart) { S.trialStart = Date.now(); save(); }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 
 // ===== Cálculos =====
+// Prueba gratis: todo incluido durante CONFIG.trialDays días; después, solo el SOS hasta comprar
+const trialLeft = () => Math.max(0, S.trialStart + CONFIG.trialDays * D - Date.now());
+const hasPro = () => !!S.pro || trialLeft() > 0;
+const trialDaysLeft = () => Math.ceil(trialLeft() / D);
+// Huella de 53 bits para comparar códigos de invitación sin dejarlos escritos en el código
+function codeHash(str){
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++){ const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
 const elapsed = () => Math.max(0, Date.now() - new Date(S.profile.quitAt).getTime());
 const cigsAvoided = () => elapsed() / D * S.profile.perDay;
 const moneySaved = () => cigsAvoided() / S.profile.perPack * S.profile.packPrice;
@@ -409,7 +426,9 @@ function applyTheme(){
   else document.documentElement.removeAttribute('data-theme');
 }
 function statusPill(){
-  $('#statusPill').innerHTML = S.pro ? '<span class="pill pill-pro">PRO</span>' : (S.demo ? '<span class="pill pill-demo">DEMO</span>' : '');
+  $('#statusPill').innerHTML = S.pro ? '<span class="pill pill-pro">PRO</span>'
+    : trialLeft() ? `<span class="pill pill-demo">PRUEBA · ${trialDaysLeft()} ${trialDaysLeft() === 1 ? 'DÍA' : 'DÍAS'}</span>`
+    : '<span class="pill pill-end">PRUEBA TERMINADA</span>';
 }
 
 // ===== Vistas =====
@@ -421,10 +440,34 @@ function render(){
   document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
   statusPill();
   $('#view').innerHTML = '';
-  VIEWS[tab]($('#view'));
+  (!hasPro() && tab !== 'sos' ? viewLocked : VIEWS[tab])($('#view'));
   window.scrollTo({top:0});
 }
 function go(t){ tab = t; try { history.replaceState(null, '', '#' + t); } catch(e){} render(); }
+
+function viewLocked(root){
+  const d = Math.floor(elapsed() / D);
+  root.innerHTML = `<section class="view">
+    <div class="card locked-hero">
+      <h3 class="sec">${S.demo ? 'Tu prueba gratis ha terminado' : `${esc(S.profile.name)}, tu prueba gratis ha terminado`}</h3>
+      <p class="muted" style="margin:6px 0 14px">Mira todo lo que llevas conseguido. Desbloquea Aire para seguir contando.</p>
+      <div class="row" style="align-items:flex-end; flex-wrap:wrap"><div><span class="big">${d}</span> <b style="font-family:var(--display); font-size:1.3rem">${d === 1 ? 'día' : 'días'} sin fumar</b></div></div>
+      <div class="stats" style="margin-top:14px">
+        <div class="stat"><b class="num">${money(moneySaved())}</b><span>ahorrado</span></div>
+        <div class="stat"><b class="num">${int(cigsAvoided())}</b><span>cigarrillos evitados</span></div>
+        <div class="stat"><b class="num">${S.log.filter(e => e.ok).length}</b><span>antojos superados</span></div>
+      </div>
+    </div>
+    ${paywall('Sigue con tu contador, tus hitos, tu diario y tus metas. Para siempre.')}
+    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>El SOS de respiración sigue siendo gratis.</small></span></button>
+  </section>`;
+  $('#goSos').onclick = () => go('sos');
+  bindPaywall(root);
+}
+function openPro(){
+  sheet(`${paywall(`Te quedan ${trialDaysLeft()} ${trialDaysLeft() === 1 ? 'día' : 'días'} de prueba. Desbloquea Aire para siempre.`)}<button class="btn btn-ghost btn-block" data-close>Ahora no</button>`);
+  bindPaywall($('#sheetRoot'));
+}
 
 function viewHoy(root){
   const p = S.profile;
@@ -433,6 +476,7 @@ function viewHoy(root){
     ${S.demo ? `<div class="card row" style="background:var(--gold-soft); border-color:transparent">
       <div class="small"><b>Estás viendo un ejemplo.</b> Crea tu plan y el contador empezará con tus datos.</div>
       <button class="btn btn-primary" id="startBtn" style="flex:none">Empezar</button></div>` : ''}
+    ${!S.pro ? `<div class="card row"><div class="small"><b>Prueba gratis: ${trialDaysLeft() === 1 ? 'te queda 1 día' : `te quedan ${trialDaysLeft()} días`}</b> con todo incluido.</div><button class="btn btn-ghost" id="proBtn" style="flex:none; min-height:40px">Desbloquear</button></div>` : ''}
     <div class="card hero">
       <canvas id="air" aria-hidden="true"></canvas>
       <div class="hero-inner">
@@ -463,6 +507,7 @@ function viewHoy(root){
   $('#goMetas').onclick = () => go('metas');
   const sb = $('#startBtn'); if (sb) sb.onclick = () => openProfile(true);
   $('#editReasons').onclick = openReasons;
+  const pb = $('#proBtn'); if (pb) pb.onclick = openPro;
   $('#shareBtn').onclick = openShare;
   renderCheckin();
   air($('#air'));
@@ -525,7 +570,7 @@ function air(cv){
 function viewSalud(root){
   const e = elapsed();
   const items = MILESTONES.map((m, i) => {
-    const done = e >= m.ms, locked = !S.pro && i >= FREE_MILESTONES;
+    const done = e >= m.ms, locked = !hasPro() && i >= FREE_MILESTONES;
     const pc = Math.min(100, e / m.ms * 100);
     const isNow = !done && (i === 0 || e >= MILESTONES[i-1].ms);
     return `<li class="ms ${done ? 'done' : ''} ${isNow ? 'now' : ''} ${locked ? 'locked' : ''}">
@@ -537,7 +582,7 @@ function viewSalud(root){
   root.innerHTML = `<section class="view">
     <div class="vh"><h2>${got} de ${MILESTONES.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde el último cigarrillo.</p></div>
     <div class="card"><ol class="timeline">${items}</ol></div>
-    ${S.pro ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
+    ${hasPro() ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
     <p class="foot-note">Fuentes: Organización Mundial de la Salud y CDC. Los plazos son aproximados y varían según la persona.</p>
   </section>`;
   bindPaywall(root);
@@ -618,7 +663,7 @@ function stopSos(){
 }
 
 function viewDiario(root){
-  if (!S.pro){
+  if (!hasPro()){
     root.innerHTML = `<section class="view"><div class="vh"><h2>Conoce tus detonantes</h2>
       <p>Cada antojo que apuntas en SOS se guarda aquí. Aire te muestra qué lo provoca y a qué horas eres más vulnerable, para que puedas anticiparte.</p></div>
       ${paywall('El diario con estadísticas forma parte de Aire Pro.')}</section>`;
@@ -659,7 +704,7 @@ function viewMetas(root){
   const badges = BADGES.map(b => { const got = b.ok(); return `<div class="badge ${got ? 'got' : ''}"><span class="medal">${b.m}</span><b>${b.t}</b><small>${b.s}</small></div>`; }).join('');
   root.innerHTML = `<section class="view">
     <div class="vh"><h2>Tu dinero tiene destino</h2><p>Lo que no gastas en tabaco, a algo que te ilusione.</p></div>
-    <div class="card" style="${S.pro ? '' : 'filter:blur(3px); opacity:.6'}" ${S.pro ? '' : 'aria-hidden="true"'}>
+    <div class="card" style="${hasPro() ? '' : 'filter:blur(3px); opacity:.6'}" ${hasPro() ? '' : 'aria-hidden="true"'}>
       <div class="goal">
         <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
           <circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pc)}" transform="rotate(-90 60 60)"/>
@@ -668,7 +713,7 @@ function viewMetas(root){
           <p class="muted small" style="margin:6px 0"><span class="num">${money(saved, 0)}</span> de <span class="num">${money(g.price, 0)}</span></p>
           <p class="small" style="margin:0">${daysLeft ? `Lo tendrás en <b>${daysLeft} días</b> sin fumar.` : '<b>¡Meta conseguida! Date el capricho.</b>'}</p></div>
       </div>
-      ${S.pro ? `<div class="grid2" style="margin-top:16px">
+      ${hasPro() ? `<div class="grid2" style="margin-top:16px">
         <div class="field"><label for="gName">Meta</label><input id="gName" value="${esc(g.name)}" maxlength="40"></div>
         <div class="field"><label for="gPrice">Precio (${esc(S.profile.currency)})</label><input id="gPrice" type="number" min="1" step="1" inputmode="numeric" value="${g.price}"></div></div>
         <button class="btn btn-ghost btn-block" id="gSave" style="margin-top:12px">Guardar meta</button>` : ''}
@@ -681,7 +726,7 @@ function viewMetas(root){
       </div></div>
     <h3 class="sec">Logros <span class="muted">${BADGES.filter(b => b.ok()).length} de ${BADGES.length}</span></h3>
     <div class="badges">${badges}</div>
-    ${S.pro ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
+    ${hasPro() ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
   </section>`;
   const gs = $('#gSave');
   if (gs) gs.onclick = () => {
@@ -740,28 +785,28 @@ function paywall(why){
     : `<button class="btn btn-primary btn-block" data-pay>Desbloquear por ${priceNow()}</button>`;
   const pending = LIVE && S.pendingAt ? `<p class="small" style="margin:10px 0 0; color:var(--accent)"><b>Esperando la confirmación del pago…</b> Se activa solo en cuanto se complete.</p>` : '';
   return `<div class="card paywall">
-    <span class="label" style="color:var(--accent)">Aire Pro</span>
+    <span class="label" style="color:var(--accent)">Aire para siempre</span>
     <h3 style="margin-top:6px">${why}</h3>
     <div class="price" style="margin-top:10px">${priceNow()}<small> · pago único, para siempre</small></div>
     ${isLaunch() ? `<p class="small" style="margin:4px 0 0"><b>Precio de lanzamiento hasta el ${launchDate()}.</b> Después, ${eur(CONFIG.price)}.</p>` : ''}
-    <ul class="checks"><li>Los 10 hitos de salud, hasta los 15 años</li><li>Diario con detonantes y horas críticas</li><li>Meta de ahorro con cuenta atrás</li><li>9 logros para celebrar cada avance</li><li>Sin suscripciones ni anuncios</li></ul>
+    <ul class="checks"><li>Contador, ahorro y check-in diario sin límite</li><li>Los 10 hitos de salud, hasta los 15 años</li><li>Diario con detonantes y horas críticas</li><li>Metas de ahorro y 9 logros</li><li>Sin suscripciones ni anuncios</li></ul>
     ${pay}${pending}
-    <div class="code-row"><input id="codeIn" placeholder="${LIVE ? 'Pega tu licencia del email' : '¿Tienes un código?'}" aria-label="Licencia o código de desbloqueo" autocomplete="off" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" data-code>Activar</button></div>
-    <p class="small muted" style="margin:10px 0 0">${LIVE ? 'Pago seguro con Lemon Squeezy. Recibes tu licencia por email para usarla también en otro móvil.' : `Vista previa: usa el código <b class="num">${CONFIG.demoCode}</b>`}</p>
+    <div class="code-row"><input id="codeIn" placeholder="${LIVE ? 'Licencia del email o código de invitación' : 'Código de invitación'}" aria-label="Licencia o código de desbloqueo" autocomplete="off" style="min-height:46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0 12px; min-width:0"><button class="btn btn-ghost" data-code>Activar</button></div>
+    <p class="small muted" style="margin:10px 0 0">${LIVE ? 'Pago seguro con Lemon Squeezy. Recibes tu licencia por email para usarla también en otro móvil.' : 'El pago con tarjeta estará disponible muy pronto.'}</p>
     <p class="small muted" style="margin:8px 0 0">Al comprar aceptas las <a href="../legal/#condiciones" target="_blank" rel="noopener">condiciones de venta</a> y que Aire Pro se active al momento. Tienes 14 días de garantía de devolución.</p>
   </div>`;
 }
 function bindPaywall(root){
   root.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => {
-    if (!LIVE) return toast('El pago se conecta al publicar la app en tu dominio.');
+    if (!LIVE) return toast('El pago estará disponible muy pronto. Si tienes un código de invitación, escríbelo abajo.');
     S.pendingAt = Date.now(); save(); pollClaim();
   });
   root.querySelectorAll('[data-code]').forEach(b => b.onclick = () => {
     const v = $('#codeIn', root).value.trim();
-    if (!v) return toast(LIVE ? 'Pega la licencia que recibiste por email.' : 'Escribe el código.');
+    if (!v) return toast(LIVE ? 'Pega la licencia que recibiste por email.' : 'Escribe tu código de invitación.');
+    if (CONFIG.inviteHashes.includes(codeHash(v.toUpperCase().replace(/\s+/g, '')))){ S.pro = true; S.proVia = 'invitación'; save(); closeSheet(); toast('Código aceptado. Aire está desbloqueado.'); return render(); }
     if (LIVE) return activateKey(v);
-    if (v.toUpperCase() === CONFIG.demoCode){ S.pro = true; save(); toast('Aire Pro activado'); render(); }
-    else toast('Ese código no es válido. Revisa el que recibiste tras el pago.');
+    toast('Ese código no es válido. Revísalo o pide uno nuevo.');
   });
 }
 
@@ -791,7 +836,7 @@ function openProfile(fromDemo){
     const q = new Date($('#fQuit').value);
     if (isNaN(q) || q > new Date()) return toast('La fecha del último cigarrillo no puede estar en el futuro.');
     const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:p.years};
-    if (fromDemo){ S = {demo:false, pro:S.pro, license:S.license, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
+    if (fromDemo){ S = {demo:false, pro:S.pro, proVia:S.proVia, license:S.license, trialStart:S.trialStart, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
     else S.profile = np;
     save(); closeSheet(); toast(fromDemo ? 'Tu contador ha empezado. ¡A por ello!' : 'Datos guardados'); go('hoy');
   };
@@ -802,7 +847,8 @@ function openSettings(){
     <button class="btn btn-ghost btn-block" id="stReasons">Mis razones para dejarlo</button>
     <button class="btn btn-ghost btn-block" id="stBackup">Copia de seguridad</button>
     <button class="btn btn-ghost btn-block" id="stTheme">Tema: ${S.theme === 'dark' ? 'oscuro' : S.theme === 'light' ? 'claro' : 'automático'}</button>
-    ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
+    ${!S.pro ? `<p class="small muted" style="margin:0">${trialLeft() ? `Prueba gratis: ${trialDaysLeft() === 1 ? 'queda 1 día' : `quedan ${trialDaysLeft()} días`}.` : 'Tu prueba gratis ha terminado.'}</p>` : ''}
+    ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo${S.proVia ? ' con un código de invitación' : ''}.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
     <button class="btn btn-ghost btn-block" id="stReset" style="color:var(--sos); border-color:var(--sos)">Borrar todos mis datos</button>
     <div id="stConfirm"></div>
     <button class="btn btn-primary btn-block" data-close>Cerrar</button>
@@ -812,10 +858,10 @@ function openSettings(){
   $('#stReasons').onclick = openReasons;
   $('#stBackup').onclick = openBackup;
   $('#stReset').onclick = () => {
-    $('#stConfirm').innerHTML = `<div class="confirm"><b>¿Borrar todo?</b><span class="small">Se eliminarán tu contador, tu diario y tu meta. No se puede deshacer.</span>
+    $('#stConfirm').innerHTML = `<div class="confirm"><b>¿Borrar todo?</b><span class="small">Se eliminarán tu contador, tu diario y tu meta. No se puede deshacer. Tu periodo de prueba no se reinicia.</span>
       <div class="btn-row"><button class="btn btn-ghost" id="rsNo">Mantener</button><button class="btn btn-sos" id="rsYes">Borrar</button></div></div>`;
     $('#rsNo').onclick = () => $('#stConfirm').innerHTML = '';
-    $('#rsYes').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = demoState(); closeSheet(); applyTheme(); toast('Datos borrados'); go('hoy'); };
+    $('#rsYes').onclick = () => { const ts = S.trialStart; try { localStorage.removeItem(KEY); } catch(e){} S = demoState(); S.trialStart = ts; save(); closeSheet(); applyTheme(); toast('Datos borrados'); go('hoy'); };
   };
 }
 function openReasons(){
