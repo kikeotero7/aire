@@ -443,6 +443,28 @@ const AIRI_SALUDOS = [
   'Piensa en lo que harás con lo que llevas ahorrado.'
 ];
 let airiQ = [], airiOn = false, airiT;
+// Nombre del usuario para personalizar los mensajes de Airi (no en el ejemplo)
+const N = () => (!S.demo && S.profile?.name) ? ', ' + S.profile.name : '';
+// Airi habla en voz alta con la voz en español del propio móvil
+function speak(text, interrupt = true){
+  if (S.voice === false || !('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(String(text).replace(/[^\p{L}\p{N}\s.,;:¡!¿?'-]/gu, ' '));
+    const vs = speechSynthesis.getVoices();
+    const v = vs.find(x => /^es[-_]ES/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
+    if (v) u.voice = v;
+    u.lang = v?.lang || 'es-ES'; u.rate = 1.02; u.pitch = 1.25;
+    if (interrupt) speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch(e){}
+}
+function airiSaludo(){
+  const extra = [];
+  if (!S.demo && S.profile.years) extra.push(`Después de ${S.profile.years} ${S.profile.years == 1 ? 'año' : 'años'} fumando, cada día sin humo es una victoria.`);
+  if (!S.demo && S.reasons?.length) extra.push(`Recuerda por qué lo haces: ${S.reasons[Math.floor(Math.random() * S.reasons.length)].toLowerCase()}.`);
+  const all = [...AIRI_SALUDOS, ...extra];
+  return all[Math.floor(Math.random() * all.length)];
+}
 function airi(pose, title, text, action){
   airiQ.push({pose, title, text, action});
   if (!airiOn) airiNext();
@@ -453,6 +475,7 @@ function airiNext(){
   let host = $('#airiRoot'); if (!host){ host = document.createElement('div'); host.id = 'airiRoot'; document.body.appendChild(host); }
   host.innerHTML = `<div class="airi-pop" role="status"><div class="airi-card"><img src="${AIRI[it.pose] || AIRI.feliz}" alt="Airi"><div><b>${esc(it.title)}</b><p>${esc(it.text)}</p>${it.action ? `<button class="btn btn-primary airi-act">${esc(it.action.label)}</button>` : ''}</div><button class="airi-x" aria-label="Cerrar">×</button></div></div>`;
   try { navigator.vibrate?.([10, 40, 10]); } catch(e){}
+  speak(`${it.title}${/[.!?]$/.test(it.title) ? '' : '.'} ${it.text}`);
   const close = () => { clearTimeout(airiT); const c = host.querySelector('.airi-card'); if (!c) return airiNext(); c.classList.add('out'); setTimeout(() => { host.innerHTML = ''; airiNext(); }, 280); };
   host.querySelector('.airi-x').onclick = close;
   const a = host.querySelector('.airi-act'); if (a) a.onclick = () => { close(); it.action.run(); };
@@ -465,17 +488,17 @@ function airiCheck(){
   const msNow = MILESTONES.filter(m => e >= m.ms).length;
   const lvNow = levelInfo();
   if (!S.seenBadges){ S.seenBadges = badgesNow; S.seenMs = msNow; S.seenLevel = lvNow.n; save(); return; }
-  if (lvNow.n > (S.seenLevel || 1)){ airi('celebra', `¡Subes a nivel ${lvNow.n}: ${lvNow.name}!`, 'Tu bosque crece contigo. Sigue sumando puntos.'); S.seenLevel = lvNow.n; save(); }
+  if (lvNow.n > (S.seenLevel || 1)){ airi('celebra', `¡Subes a nivel ${lvNow.n}${N()}!`, `Ahora eres ${lvNow.name}. Tu bosque crece contigo.`); S.seenLevel = lvNow.n; save(); }
   const nuevos = badgesNow.filter(id => !S.seenBadges.includes(id));
-  nuevos.forEach(id => { const b = BADGES.find(x => x.id === id); airi('medalla', `¡Nuevo logro: ${b.t}!`, `${b.s}. Lo tienes en Metas.`); });
-  if (msNow > (S.seenMs || 0)){ const m = MILESTONES[msNow - 1]; airi('celebra', `Nuevo hito: ${m.t}`, m.d); }
+  nuevos.forEach(id => { const b = BADGES.find(x => x.id === id); airi('medalla', `¡Enhorabuena${N()}!`, `Nuevo logro: ${b.t}. ${b.s}.`); });
+  if (msNow > (S.seenMs || 0)){ const m = MILESTONES[msNow - 1]; airi('celebra', `Tu cuerpo te lo agradece${N()}`, `Nuevo hito: ${m.t}. ${m.d}`); }
   if (nuevos.length || msNow !== S.seenMs){ S.seenBadges = badgesNow; S.seenMs = msNow; save(); }
   const hoyK = dayKey(Date.now());
   if (S.airiDay !== hoyK){
     S.airiDay = hoyK; save();
     const d = Math.floor(e / D);
-    if (!S.pro && trialLeft() && trialDaysLeft() === 1) airi('feliz', 'Último día de prueba', 'Mañana se bloquea Aire. Puedes desbloquearla para siempre.', {label:'Ver opciones', run:openPro});
-    else if (!nuevos.length && msNow === S.seenMs) airi('feliz', d ? `¡Hola! Llevas ${d} ${d === 1 ? 'día' : 'días'}` : '¡Hola! Empieza tu día sin humo', AIRI_SALUDOS[Math.floor(Date.now() / D) % AIRI_SALUDOS.length]);
+    if (!S.pro && trialLeft() && trialDaysLeft() === 1) airi('feliz', `Último día de prueba${N()}`, 'Mañana se bloquea Aire. Puedes desbloquearla para siempre.', {label:'Ver opciones', run:openPro});
+    else if (!nuevos.length && msNow === S.seenMs) airi('feliz', d ? `¡Hola${N()}! Llevas ${d} ${d === 1 ? 'día' : 'días'}` : `¡Hola${N()}! Empieza tu día sin humo`, airiSaludo());
   }
 }
 // Juego: puntos y niveles con temática de bosque, calculados a partir de lo que hace el usuario
@@ -519,7 +542,7 @@ function renderGame(){
       <div class="pts"><span class="num">${L.p} puntos</span><span>${L.to ? `${L.to - L.p} para ${L.nextName}` : '¡Nivel máximo!'}</span></div></div></div>`;
     $('#airiTap').onclick = e => {
       const b = e.currentTarget; b.classList.remove('bounce'); void b.offsetWidth; b.classList.add('bounce');
-      airi('feliz', '¡Hola!', AIRI_SALUDOS[Math.floor(Math.random() * AIRI_SALUDOS.length)]);
+      airi('feliz', `¡Hola${N()}!`, airiSaludo());
     };
   }
   const mc = $('#missionCard'); if (mc){
@@ -528,7 +551,7 @@ function renderGame(){
       ${done ? '' : '<button class="btn btn-primary" id="missionOk" style="flex:none; min-height:40px; padding:0 14px">Hecho</button>'}</div>`;
     const ok = $('#missionOk'); if (ok) ok.onclick = () => {
       S.missions = S.missions || {}; S.missions[dayKey(Date.now())] = true; save();
-      airi('celebra', '¡Reto superado! +10 puntos', 'Cada pequeño paso te acerca a tu nuevo nivel.');
+      airi('celebra', `¡Reto superado${N()}!`, 'Más 10 puntos. Cada pequeño paso te acerca a tu nuevo nivel.');
       renderGame(); airiCheck();
     };
   }
@@ -685,9 +708,9 @@ function renderCheckin(){
     S.checkins[dayKey(Date.now())] = b.dataset.m; save();
     try { navigator.vibrate?.(15); } catch(e){}
     const m = b.dataset.m;
-    if (m === 'bien') airi('celebra', '¡Así se hace!', 'Un día más sumando. Estoy orgulloso de ti.');
-    else if (m === 'regular') airi('feliz', 'Un día normal también suma', 'No hace falta que sea perfecto. Sigue contando conmigo.');
-    else airi('feliz', 'Estoy contigo', 'Los días difíciles pasan. ¿Respiramos juntos 3 minutos?', {label:'Respirar con Airi', run:() => go('sos')});
+    if (m === 'bien') airi('celebra', `¡Así se hace${N()}!`, 'Un día más sumando. Estoy orgulloso de ti.');
+    else if (m === 'regular') airi('feliz', `Un día normal también suma${N()}`, 'No hace falta que sea perfecto. Sigue contando conmigo.');
+    else airi('feliz', `Estoy contigo${N()}`, 'Los días difíciles pasan. ¿Respiramos juntos 3 minutos?', {label:'Respirar con Airi', run:() => go('sos')});
     renderCheckin(); renderGame(); airiCheck();
   });
 }
@@ -760,7 +783,7 @@ function viewSos(root){
     c.setAttribute('aria-pressed', 'true'); trig = c.dataset.t;
   });
   $('#sosStart').onclick = startSos;
-  $('#okBtn').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'craving', trigger:trig || 'Otro', ok:true}); save(); airi('celebra', '¡Antojo superado!', `Ya van ${S.log.filter(x => x.ok).length}. Cada uno te hace más fuerte.`); go('hoy'); };
+  $('#okBtn').onclick = () => { S.log.unshift({t:new Date().toISOString(), kind:'craving', trigger:trig || 'Otro', ok:true}); save(); airi('celebra', `¡Bien${N()}! Antojo superado`, `Ya van ${S.log.filter(x => x.ok).length}. Cada uno te hace más fuerte.`); go('hoy'); };
   $('#slipBtn').onclick = () => {
     $('#slipConfirm').innerHTML = `<div class="confirm" style="margin-top:12px">
       <b>Un desliz no borra tu progreso.</b>
@@ -780,6 +803,7 @@ function startSos(){
   const next = () => {
     const [name, sec, sc] = seq[i % 3];
     phase.textContent = name; core.textContent = sec + ' s';
+    speak(name);
     core.style.transitionDuration = sec + 's'; core.style.transform = `scale(${sc})`;
     try { navigator.vibrate?.(name === 'Exhala' ? [20, 60, 20] : 25); } catch(e){}
     i++; sos.phaseT = setTimeout(next, sec * 1000);
@@ -795,13 +819,14 @@ function startSos(){
   sos.cdT = setInterval(() => {
     const left = Math.max(0, end - Date.now());
     cd.textContent = `${Math.floor(left / 60e3)}:${pad(Math.floor(left % 60e3 / 1e3))}`;
-    if (!left){ stopSos(); airi('celebra', '¡3 minutos superados!', 'El antojo ya ha perdido fuerza. Apúntalo abajo.'); phase.textContent = '¡Lo has conseguido!'; core.textContent = '3 min'; core.style.transform = 'scale(1)'; btn.textContent = 'Otra ronda'; btn.onclick = startSos; $('#logCard').scrollIntoView({behavior:'smooth', block:'center'}); }
+    if (!left){ stopSos(); airi('celebra', `¡Muy bien${N()}! 3 minutos superados`, 'El antojo ya ha perdido fuerza. Apúntalo abajo.'); phase.textContent = '¡Lo has conseguido!'; core.textContent = '3 min'; core.style.transform = 'scale(1)'; btn.textContent = 'Otra ronda'; btn.onclick = startSos; $('#logCard').scrollIntoView({behavior:'smooth', block:'center'}); }
   }, 250);
   try { navigator.wakeLock?.request('screen').then(l => { if (sos) sos.lock = l; }).catch(() => {}); } catch(e){}
 }
 function stopSos(){
   if (!sos) return;
   clearTimeout(sos.phaseT); clearInterval(sos.tipT); clearInterval(sos.cdT);
+  try { speechSynthesis.cancel(); } catch(e){}
   try { sos.lock?.release(); } catch(e){}
   sos = null;
 }
@@ -964,6 +989,10 @@ function openProfile(fromDemo){
     <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
     <form id="pf" style="display:flex; flex-direction:column; gap:12px">
       <div class="field"><label for="fName">Tu nombre</label><input id="fName" required maxlength="24" value="${esc(p.name)}" placeholder="Cómo quieres que te llamemos"></div>
+      <div class="grid2">
+        <div class="field"><label for="fAge">Edad <span class="muted" style="font-weight:400">(opcional)</span></label><input id="fAge" type="number" min="18" max="99" inputmode="numeric" value="${p.age || ''}" placeholder="Ej. 38"></div>
+        <div class="field"><label for="fYears">Años fumando <span class="muted" style="font-weight:400">(opcional)</span></label><input id="fYears" type="number" min="0" max="80" inputmode="numeric" value="${p.years || ''}" placeholder="Ej. 12"></div>
+      </div>
       <div class="field"><label for="fQuit">Último cigarrillo</label><input id="fQuit" type="datetime-local" required value="${dt}"></div>
       <div class="grid2">
         <div class="field"><label for="fDay">Cigarrillos al día</label><input id="fDay" type="number" min="1" max="100" required inputmode="numeric" value="${p.perDay}"></div>
@@ -972,6 +1001,7 @@ function openProfile(fromDemo){
         <div class="field"><label for="fCur">Moneda</label><select id="fCur">${cur.map(c => `<option ${c === p.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
       </div>
       ${fromDemo ? `<div class="field"><label>Por qué lo dejas <span class="muted" style="font-weight:400">(elige las que quieras)</span></label><div class="chips" id="fReasons">${REASONS.map(r => `<button type="button" class="chip" aria-pressed="false">${r}</button>`).join('')}</div></div>` : ''}
+      <label style="display:flex; gap:10px; align-items:center; font-size:.92rem"><input type="checkbox" id="fVoice" ${S.voice === false ? '' : 'checked'} style="width:20px; height:20px; accent-color:var(--accent)"> Que Airi me hable en voz alta</label>
       <button class="btn btn-primary btn-block" type="submit">${fromDemo ? 'Empezar mi contador' : 'Guardar'}</button>
       <button class="btn btn-ghost btn-block" type="button" data-close>Cancelar</button>
     </form>`);
@@ -980,12 +1010,14 @@ function openProfile(fromDemo){
     ev.preventDefault();
     const q = new Date($('#fQuit').value);
     if (isNaN(q) || q > new Date()) return toast('La fecha del último cigarrillo no puede estar en el futuro.');
-    const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:p.years};
+    const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:+$('#fYears').value || null, age:+$('#fAge').value || null};
+    const voice = $('#fVoice').checked;
     if (fromDemo){ S = {demo:false, pro:S.pro, proVia:S.proVia, license:S.license, trialStart:S.trialStart, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
     else S.profile = np;
+    S.voice = voice;
     if (fromDemo){ S.seenBadges = undefined; S.airiDay = dayKey(Date.now()); }
     save(); closeSheet();
-    if (fromDemo) airi('celebra', `¡Bienvenido, ${np.name}!`, 'Soy Airi. Te acompañaré en cada logro y en cada antojo.'); else toast('Datos guardados');
+    if (fromDemo) airi('celebra', `¡Hola, ${np.name}! Empezamos juntos`, 'Soy Airi. Te acompañaré en cada logro y en cada antojo.'); else toast('Datos guardados');
     go('hoy');
   };
 }
@@ -994,6 +1026,7 @@ function openSettings(){
     <button class="btn btn-ghost btn-block" id="stProfile">${S.demo ? 'Crear mi plan' : 'Editar mis datos'}</button>
     <button class="btn btn-ghost btn-block" id="stReasons">Mis razones para dejarlo</button>
     <button class="btn btn-ghost btn-block" id="stBackup">Copia de seguridad</button>
+    <button class="btn btn-ghost btn-block" id="stVoice">Voz de Airi: ${S.voice === false ? 'desactivada' : 'activada'}</button>
     <button class="btn btn-ghost btn-block" id="stTheme">Tema: ${S.theme === 'dark' ? 'oscuro' : S.theme === 'light' ? 'claro' : 'automático'}</button>
     ${!S.pro ? `<p class="small muted" style="margin:0">${trialLeft() ? `Prueba gratis: ${trialDaysLeft() === 1 ? 'queda 1 día' : `quedan ${trialDaysLeft()} días`}.` : 'Tu prueba gratis ha terminado.'}</p>` : ''}
     ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo${S.proVia ? ' con un código de invitación' : ''}.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
@@ -1003,6 +1036,7 @@ function openSettings(){
     <p class="foot-note">Aire · una app de KREA Digital Studio<br><a href="../legal/#aviso" target="_blank" rel="noopener">Aviso legal</a> · <a href="../legal/#privacidad" target="_blank" rel="noopener">Privacidad</a> · <a href="../legal/#condiciones" target="_blank" rel="noopener">Condiciones</a></p>`);
   $('#stProfile').onclick = () => { closeSheet(); openProfile(S.demo); };
   $('#stTheme').onclick = () => { cycleTheme(); openSettings(); };
+  $('#stVoice').onclick = () => { S.voice = S.voice === false; save(); if (S.voice) speak(`Hola${N()}. Ya puedo hablarte.`); openSettings(); };
   $('#stReasons').onclick = openReasons;
   $('#stBackup').onclick = openBackup;
   $('#stReset').onclick = () => {
