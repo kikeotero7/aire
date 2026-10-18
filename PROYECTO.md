@@ -46,4 +46,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - [ ] Compra de prueba en modo test con la tarjeta 4242 4242 4242 4242.
 - [ ] (Opcional) Alojar las tipografías en el propio sitio y borrar el apartado 5 de la privacidad.
 
-Guía paso a paso de la parte de cobro: `VENTAS.md`.
+- [ ] **Google Play:** cuenta de Play Console (personal), paquete con PWABuilder, prueba cerrada 12 personas × 14 días. Guía completa en `GOOGLE_PLAY.md`.
+- [ ] Alojar las tipografías en el propio sitio antes de enviar el formulario de seguridad de datos de Google Play.
+
+Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.

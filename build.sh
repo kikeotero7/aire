@@ -12,7 +12,7 @@ wrap() { # $1 fuente, $2 destino, $3 etiquetas extra en <head>
     printf '</body>\n</html>\n'
   } > "$2"
 }
-wrap app.html app/index.html '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.svg"><meta name="apple-mobile-web-app-capable" content="yes">'
+wrap app.html app/index.html '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">'
 wrap landing.html index.html '<link rel="icon" href="app/icon.svg" type="image/svg+xml">'
 mkdir -p legal
 wrap legal.html legal/index.html '<link rel="icon" href="../app/icon.svg" type="image/svg+xml">'

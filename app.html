@@ -955,6 +955,6 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 const h = (location.hash || '').slice(1);
 if (VIEWS[h]) tab = h;
 applyTheme(); render(); pollClaim(); revalidate();
-if (LIVE && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>

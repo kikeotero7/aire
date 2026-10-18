@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.svg"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>Aire · Deja de fumar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Aire: la app para dejar de fumar. Contador en vivo, dinero ahorrado, hitos de salud, botón SOS para antojos y diario de progreso.">
@@ -964,7 +964,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 const h = (location.hash || '').slice(1);
 if (VIEWS[h]) tab = h;
 applyTheme(); render(); pollClaim(); revalidate();
-if (LIVE && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>
