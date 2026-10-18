@@ -35,6 +35,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - [ ] Kike crea el repositorio vacío `aire` en GitHub (público) y da acceso a Claude.
 - [ ] Subir el proyecto, activar GitHub Pages con dominio `aire.kreadigitalstudio.es`.
 - [ ] Crear el CNAME en OVHcloud y activar "Enforce HTTPS" en GitHub Pages.
+- [ ] **Bloqueado hasta que Kike se dé de alta (autónomo o sociedad, KREA Digital Studio):** datos legales, Lemon Squeezy y Cloudflare. No cobrar antes del alta.
 - [ ] Rellenar los datos del titular en `legal.html` (marcados en amarillo: nombre/razón social, NIF, dirección, email).
 - [ ] Revisión de los textos legales por la gestoría.
 - [ ] Lemon Squeezy: tienda, producto Aire Pro 9,99 €, licencias (3 activaciones), descuento LANZAMIENTO.
