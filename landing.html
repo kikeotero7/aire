@@ -58,8 +58,8 @@ nav.top .btn{min-height:42px; padding:0 16px; font-size:.92rem}
 .trust{display:flex; flex-wrap:wrap; gap:8px 18px; font-size:.9rem; color:var(--muted)}
 .trust span::before{content:"✓ "; color:var(--accent); font-weight:700}
 .hero-visual{position:relative; justify-self:stretch; min-width:0; display:grid; justify-items:center}
-.hero-photo{display:block; width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:58% 50%; border-radius:32px; box-shadow:0 30px 60px -30px color-mix(in srgb, var(--ink) 55%, transparent)}
-.hero-visual.has-photo .phone{position:absolute; left:-56px; bottom:-40px; width:300px; transform:scale(.66); transform-origin:bottom left}
+.hero-photo{display:block; width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 50%; border-radius:32px; box-shadow:0 30px 60px -30px color-mix(in srgb, var(--ink) 55%, transparent)}
+.hero-visual.has-photo .phone{position:absolute; right:-48px; bottom:-40px; width:300px; transform:scale(.56); transform-origin:bottom right}
 .photo-note{position:absolute; right:16px; top:16px; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-radius:999px; padding:8px 14px; font-size:.85rem; font-weight:700; color:var(--accent)}
 .science-head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); gap:32px; align-items:center}
 .science-head img{width:100%; height:auto; border-radius:24px; display:block}
@@ -149,7 +149,8 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
   .hero .wrap, .calc .wrap{grid-template-columns:1fr}
   .hero-photo{aspect-ratio:4/3}
   .hero-visual{margin-bottom:24px}
-  .hero-visual.has-photo .phone{left:8px; bottom:-28px; transform:scale(.5)}
+  .hero-visual.has-photo .phone{display:none}
+  .hero-visual{margin-bottom:0}
   .science-head{grid-template-columns:1fr}
   .science-head img{max-width:380px}
   .feat-grid{grid-template-columns:1fr 1fr}
@@ -177,7 +178,8 @@ footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12
     <div class="btns"><a class="btn btn-primary" href="app/">Probar 7 días gratis</a><a class="btn btn-ghost" href="#calculadora">¿Cuánto ahorrarías?</a></div>
     <div class="trust"><span>Sin registro</span><span>Funciona sin internet</span><span>7 días gratis, sin tarjeta</span></div>
   </div>
-  <div class="hero-visual">
+  <div class="hero-visual has-photo">
+  <img class="hero-photo" src="img/portada-pareja.webp" srcset="img/portada-pareja-900.webp 900w, img/portada-pareja.webp 2000w" sizes="(max-width: 860px) 100vw, 45vw" width="2000" height="1342" alt="Silueta de una mujer y un hombre espalda con espalda respirando, con un bosque verde dentro de los pulmones" fetchpriority="high">
   <div class="phone" aria-label="Vista de la app Aire">
     <div class="screen">
       <div class="scr-hero"><small>Llevas sin fumar</small><b><span id="dDays">9</span> días</b><span class="num" id="dHms">04 h 12 min 00 s</span></div>
