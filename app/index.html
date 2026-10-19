@@ -1255,7 +1255,7 @@ function openVoicePicker(){
   const muestra = `¡Hola${N()}! Soy Airi. Estoy aquí para ayudarte en cada antojo.`;
   const draw = () => {
     const vs = esVoices(), cur = S.voiceName || (vs.find(x => /^es[-_]ES/i.test(x.lang)) || vs[0])?.name, tono = S.voiceTone || 'alegre';
-    $('#vpList').innerHTML = vs.length ? vs.map((v, i) => `<li class="vp ${v.name === cur ? 'on' : ''}"><button class="vp-pick" data-i="${i}" aria-pressed="${v.name === cur}"><b>${esc(v.name.replace(/Microsoft |Google |\(.*?\)|- Spanish.*$/g, '').trim() || 'Voz ' + (i + 1))}</b><small>${esc(v.lang)}${v.localService ? '' : ' · necesita internet'}</small></button><button class="btn btn-ghost vp-play" data-i="${i}" aria-label="Probar">▶ Probar</button></li>`).join('')
+    $('#vpList').innerHTML = vs.length ? vs.map((v, i) => `<li class="vp ${v.name === cur ? 'on' : ''}"><button class="vp-pick" data-i="${i}" aria-pressed="${v.name === cur}"><b>${esc(v.name.replace(/Microsoft |\(.*?\)|- Spanish.*$/g, '').trim() || 'Voz ' + (i + 1))}</b><small>${esc(v.lang)}${v.localService ? '' : ' · necesita internet'}</small></button><button class="btn btn-ghost vp-play" data-i="${i}" aria-label="Probar">▶ Probar</button></li>`).join('')
       : '<li class="muted small">Tu móvil no tiene voces en español instaladas. En Ajustes del teléfono → Idioma → Texto a voz puedes descargarlas.</li>';
     document.querySelectorAll('#vpTone .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.t === tono));
     document.querySelectorAll('.vp-play').forEach(b => b.onclick = () => speak(muestra, true, vs[+b.dataset.i].name, tono));
