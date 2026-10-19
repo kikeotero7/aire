@@ -268,8 +268,9 @@ textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border
 /* Pulmones que se llenan de vida con los hitos */
 .lungs{position:relative; max-width:300px; margin:0 auto; aspect-ratio:600/533}
 .lungs img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; border-radius:20px}
-.lungs .gray{filter:grayscale(1) brightness(1.08); opacity:.5}
-.lungs .color{transition:clip-path 1.2s cubic-bezier(.2,.8,.2,1)}
+.lungs .gray{filter:grayscale(1) brightness(1.04); opacity:.7}
+/* El color sube por dentro de los pulmones (el dibujo ocupa del 9 % al 88 % de la imagen desde abajo), con borde suave */
+.lungs .color{-webkit-mask-image:linear-gradient(to top, #000 var(--fill), transparent calc(var(--fill) + 7%)); mask-image:linear-gradient(to top, #000 var(--fill), transparent calc(var(--fill) + 7%))}
 .lungs-cap{text-align:center; font-weight:700; color:var(--accent); margin-top:8px}
 /* Juego: niveles, reto del día y logros con Airi */
 .level{display:grid; grid-template-columns:76px minmax(0,1fr); gap:14px; align-items:center}
@@ -951,7 +952,7 @@ function viewSalud(root){
   const got = MS.filter(m => e >= m.ms).length;
   root.innerHTML = `<section class="view">
     <div class="vh"><h2>${got} de ${MS.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde ${smokes() ? 'el último cigarrillo' : 'la última calada al vaper'}.</p></div>
-    <div class="card"><div class="lungs" role="img" aria-label="Tus pulmones se recuperan: ${Math.round(got / MS.length * 100)} %"><img class="gray" src="../img/pulmones.webp" alt=""><img class="color" src="../img/pulmones.webp" alt="" style="clip-path:inset(${100 - Math.round(got / MS.length * 100)}% 0 0 0)"></div>
+    <div class="card"><div class="lungs" role="img" aria-label="Tus pulmones se recuperan: ${Math.round(got / MS.length * 100)} %"><img class="gray" src="../img/pulmones.webp" alt=""><img class="color" src="../img/pulmones.webp" alt="" style="--fill:${(9 + 79 * got / MS.length).toFixed(1)}%"></div>
       <p class="lungs-cap">Tus pulmones se recuperan: ${Math.round(got / MS.length * 100)} %</p></div>
     <div class="card"><ol class="timeline">${items}</ol></div>
     ${hasPro() ? '' : paywall(`Desbloquea los ${MS.length} hitos de salud, tu diario de antojos y las metas de ahorro.`)}
