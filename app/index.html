@@ -128,8 +128,8 @@ a{color:var(--accent)}
 /* SOS */
 .breath{display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 18px}
 .breath{position:relative; overflow:hidden; isolation:isolate}
-.breath::before{content:""; position:absolute; inset:0; z-index:-1; background:url('../img/portada-pareja-900.webp') center 30% / cover no-repeat; opacity:.28}
-.breath::after{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, color-mix(in srgb, var(--surface) 35%, transparent), var(--surface) 92%)}
+.breath::before{content:""; position:absolute; inset:0 0 auto 0; height:72%; z-index:-1; background:url('../img/portada-pareja-900.webp') center 18% / cover no-repeat}
+.breath::after{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, transparent) 0%, transparent 17%, transparent 30%, color-mix(in srgb, var(--surface) 55%, transparent) 50%, var(--surface) 68%)}
 .lung{position:relative; width:min(72vw, 260px); aspect-ratio:1; max-width:100%; display:grid; place-items:center}
 .lung .halo{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)}
 .lung .core{width:58%; aspect-ratio:1; border-radius:50%; background:var(--accent); transform:scale(.6); transition:transform 4s cubic-bezier(.45,0,.3,1); display:grid; place-items:center; color:var(--on-accent); font-family:var(--display); font-weight:700; font-size:1.1rem; text-align:center; padding:10px}
