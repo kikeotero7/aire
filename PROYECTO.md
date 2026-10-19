@@ -64,6 +64,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - Airi habla en voz alta y usa el nombre del usuario; ficha inicial con edad y años fumando.
 - Modo juego, reto del día, logros bronce/plata/oro, instalación con un toque y vista previa en WhatsApp.
 - Código de invitación: AIRE2026 (solo su huella en el código).
+- **Tabaco, vaper o los dos:** la ficha inicial pregunta qué quiere dejar con tres botones grandes. Con vaper pide el gasto semanal y la app cambia contador ("sin vapear"), estadísticas (horas sin nicotina, antojos superados), 10 hitos propios del vaper (`MS_VAPE`), misiones y textos. Perfiles antiguos = tabaco. Nunca se recomienda el vaper para dejar de fumar.
 - **Siguiente:** prueba con conocidos SIN código durante 15 días, recogiendo opiniones; después se decide si se usa AIRE2026 y se pasa a cobrar. Si gusta: alta de autónomo, Google Play Console (25 $ pago único) y cobro. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
 
 Guía paso a paso de la parte de cobro: `VENTAS.md`. Guía de Google Play: `GOOGLE_PLAY.md`.

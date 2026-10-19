@@ -1,10 +1,10 @@
 <title>Aire · Deja de fumar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Aire: la app para dejar de fumar. Contador en vivo, dinero ahorrado, hitos de salud, botón SOS para antojos y diario de progreso.">
+<meta name="description" content="Aire: la app para dejar de fumar o de vapear. Contador en vivo, dinero ahorrado, hitos de salud, botón SOS para antojos y diario de progreso.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aire">
 <meta property="og:title" content="Aire · Deja de fumar">
-<meta property="og:description" content="Cuenta tus días sin fumar, mira tu ahorro y supera cada antojo con el SOS. 15 días gratis.">
+<meta property="og:description" content="Deja el tabaco o el vaper: cuenta tus días, mira tu ahorro y supera cada antojo con el SOS. 15 días gratis.">
 <meta property="og:url" content="https://aire.kreadigitalstudio.es/app/">
 <meta property="og:image" content="https://aire.kreadigitalstudio.es/img/og-aire.jpg">
 <meta property="og:image:width" content="1200">
@@ -288,6 +288,13 @@ textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border
   *{animation:none !important; transition:none !important}
 }
 .brand .logo{width:36px; height:36px; border-radius:11px; object-fit:cover; box-shadow:0 0 0 1px var(--line)}
+.habit-pick{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.habit-opt{display:flex; flex-direction:column; align-items:center; gap:4px; min-height:74px; padding:10px 6px; border-radius:16px; border:2px solid var(--line); background:var(--surface); color:inherit; font:inherit; font-weight:700; font-size:1rem; cursor:pointer; transition:border-color .15s, background .15s, transform .1s}
+.habit-opt span{display:flex; color:var(--accent)}
+.habit-opt:active{transform:scale(.97)}
+.habit-opt[aria-checked="true"]{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, var(--surface))}
+.habit-opt:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+[hidden]{display:none!important}
 </style>
 
 <div class="app" id="app">
@@ -391,8 +398,17 @@ function codeHash(str){
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 const elapsed = () => Math.max(0, Date.now() - new Date(S.profile.quitAt).getTime());
-const cigsAvoided = () => elapsed() / D * S.profile.perDay;
-const moneySaved = () => cigsAvoided() / S.profile.perPack * S.profile.packPrice;
+// Hábito que se deja: 'tabaco', 'vaper' o 'ambos' (los perfiles antiguos son de tabaco)
+const habit = () => S.profile?.habit || 'tabaco';
+const smokes = () => habit() !== 'vaper';
+const vapes = () => habit() !== 'tabaco';
+const sinX = () => ({tabaco:'sin fumar', vaper:'sin vapear', ambos:'sin fumar ni vapear'})[habit()];
+const ganas = () => ({tabaco:'Tengo ganas de fumar', vaper:'Tengo ganas de vapear', ambos:'Tengo ganas de fumar o vapear'})[habit()];
+const habitName = () => ({tabaco:'tabaco', vaper:'el vaper', ambos:'tabaco y vaper'})[habit()];
+const cigsAvoided = () => smokes() ? elapsed() / D * S.profile.perDay : 0;
+const perDayMoney = () => (smokes() ? S.profile.perDay / S.profile.perPack * S.profile.packPrice : 0) + (vapes() ? (S.profile.vapeWeek || 0) / 7 : 0);
+const moneySaved = () => elapsed() / D * perDayMoney();
+const okCount = () => S.log.filter(e => e.ok).length;
 const money = (v, dec) => { try { return new Intl.NumberFormat('es', {style:'currency', currency:S.profile.currency, maximumFractionDigits:dec ?? (v < 100 ? 2 : 0)}).format(v); } catch(e){ return v.toFixed(2) + ' ' + S.profile.currency; } };
 const int = v => new Intl.NumberFormat('es').format(Math.floor(v));
 function lifeText(){
@@ -424,6 +440,20 @@ const MILESTONES = [
   {ms:10*365*D, t:'Pulmones protegidos', d:'El riesgo de cáncer de pulmón cae a cerca de la mitad del de una persona fumadora.'},
   {ms:15*365*D, t:'Como si nunca hubieras fumado', d:'El riesgo de enfermedad coronaria es el de una persona no fumadora.'}
 ];
+// Hitos al dejar el vaper (efectos de la nicotina y de la abstinencia; valores aproximados)
+const MS_VAPE = [
+  {ms:20*60e3, t:'Tu corazón se calma', d:'Sin nicotina, la frecuencia cardiaca y la presión arterial empiezan a bajar.'},
+  {ms:24*H, t:'Menos nicotina en sangre', d:'La nicotina se elimina rápido: tras un día queda muy poca en tu sangre.'},
+  {ms:72*H, t:'Nicotina fuera', d:'En unos 3 días tu cuerpo la ha eliminado casi por completo. Es el pico de la abstinencia: después, todo mejora.'},
+  {ms:7*D, t:'Antojos más espaciados', d:'Las ganas llegan con menos frecuencia y duran menos.'},
+  {ms:14*D, t:'Garganta más tranquila', d:'Mucha gente nota menos tos, menos irritación de garganta y mejor descanso.'},
+  {ms:30*D, t:'La abstinencia se apaga', d:'La irritabilidad, la ansiedad y la falta de concentración suelen desaparecer entre 2 y 4 semanas.'},
+  {ms:60*D, t:'Más energía', d:'Mejor sueño y menos altibajos de ánimo: ya no dependes de la siguiente calada.'},
+  {ms:90*D, t:'Cerebro reajustado', d:'Los receptores de nicotina de tu cerebro vuelven a niveles parecidos a los de alguien que no la consume.'},
+  {ms:182*D, t:'Menos riesgo de recaída', d:'Superados los 6 meses, el riesgo de volver a engancharte baja mucho.'},
+  {ms:365*D, t:'Un año libre de nicotina', d:'Has roto el hábito. Tu cuerpo y tu bolsillo lo notan cada día.'}
+];
+const ms = () => smokes() ? MILESTONES : MS_VAPE;
 const FREE_MILESTONES = 4;
 
 const BADGES = [
@@ -433,8 +463,8 @@ const BADGES = [
   {id:'w2', t:'Quincena', s:'14 días seguidos', ok:() => elapsed() >= 14*D, m:'14'},
   {id:'m1', t:'Un mes', s:'30 días libre', ok:() => elapsed() >= 30*D, m:'1m'},
   {id:'m3', t:'Trimestre', s:'90 días libre', ok:() => elapsed() >= 90*D, m:'3m'},
-  {id:'c100', t:'100 menos', s:'cigarrillos evitados', ok:() => cigsAvoided() >= 100, m:'100'},
-  {id:'k1', t:'Primer SOS', s:'antojo superado', ok:() => S.log.some(e => e.ok), m:'1×'},
+  {id:'c100', get t(){ return smokes() ? '100 menos' : '100 horas'; }, get s(){ return smokes() ? 'cigarrillos evitados' : 'sin nicotina'; }, ok:() => smokes() ? cigsAvoided() >= 100 : elapsed() >= 100*H, m:'100'},
+  {id:'k1', t:'Primer SOS', s:'antojo superado', ok:() => okCount() > 0, m:'1×'},
   {id:'k10', t:'Mente fuerte', s:'10 antojos superados', ok:() => S.log.filter(e => e.ok).length >= 10, m:'10×'}
 ];
 
@@ -453,7 +483,7 @@ function checkinStreak(){
 // Airi aparece en momentos clave del uso: logros, hitos, check-in, SOS y saludo diario
 const AIRI = { feliz:'../img/airi-feliz.webp', celebra:'../img/airi-celebra.webp', medalla:'../img/airi-medalla.webp' };
 const AIRI_SALUDOS = [
-  'Cada hora sin fumar cuenta. Hoy también.',
+  'Cada hora sin nicotina cuenta. Hoy también.',
   'Tus pulmones ya están trabajando para ti.',
   'Si llega un antojo, respiramos juntos 3 minutos.',
   'Lo estás haciendo mejor de lo que crees.',
@@ -477,7 +507,7 @@ function speak(text, interrupt = true){
 }
 function airiSaludo(){
   const extra = [];
-  if (!S.demo && S.profile.years) extra.push(`Después de ${S.profile.years} ${S.profile.years == 1 ? 'año' : 'años'} fumando, cada día sin humo es una victoria.`);
+  if (!S.demo && S.profile.years) extra.push(`Después de ${S.profile.years} ${S.profile.years == 1 ? 'año' : 'años'} ${({tabaco:'fumando', vaper:'vapeando', ambos:'fumando y vapeando'})[habit()]}, cada día ${sinX()} es una victoria.`);
   if (!S.demo && S.reasons?.length) extra.push(`Recuerda por qué lo haces: ${S.reasons[Math.floor(Math.random() * S.reasons.length)].toLowerCase()}.`);
   const all = [...AIRI_SALUDOS, ...extra];
   return all[Math.floor(Math.random() * all.length)];
@@ -502,37 +532,37 @@ function airiNext(){
 function airiCheck(){
   const e = elapsed();
   const badgesNow = BADGES.filter(b => b.ok()).map(b => b.id);
-  const msNow = MILESTONES.filter(m => e >= m.ms).length;
+  const msNow = ms().filter(m => e >= m.ms).length;
   const lvNow = levelInfo();
   if (!S.seenBadges){ S.seenBadges = badgesNow; S.seenMs = msNow; S.seenLevel = lvNow.n; save(); return; }
   if (lvNow.n > (S.seenLevel || 1)){ airi('celebra', `¡Subes a nivel ${lvNow.n}${N()}!`, `Ahora eres ${lvNow.name}. Tu bosque crece contigo.`); S.seenLevel = lvNow.n; save(); }
   const nuevos = badgesNow.filter(id => !S.seenBadges.includes(id));
   nuevos.forEach(id => { const b = BADGES.find(x => x.id === id); airi('medalla', `¡Enhorabuena${N()}!`, `Nuevo logro: ${b.t}. ${b.s}.`); });
-  if (msNow > (S.seenMs || 0)){ const m = MILESTONES[msNow - 1]; airi('celebra', `Tu cuerpo te lo agradece${N()}`, `Nuevo hito: ${m.t}. ${m.d}`); }
+  if (msNow > (S.seenMs || 0)){ const m = ms()[msNow - 1]; airi('celebra', `Tu cuerpo te lo agradece${N()}`, `Nuevo hito: ${m.t}. ${m.d}`); }
   if (nuevos.length || msNow !== S.seenMs){ S.seenBadges = badgesNow; S.seenMs = msNow; save(); }
   const hoyK = dayKey(Date.now());
   if (S.airiDay !== hoyK){
     S.airiDay = hoyK; save();
     const d = Math.floor(e / D);
     if (!S.pro && trialLeft() && trialDaysLeft() === 1) airi('feliz', `Último día de prueba${N()}`, 'Mañana se bloquea Aire. Puedes desbloquearla para siempre.', {label:'Ver opciones', run:openPro});
-    else if (!nuevos.length && msNow === S.seenMs) airi('feliz', d ? `¡Hola${N()}! Llevas ${d} ${d === 1 ? 'día' : 'días'}` : `¡Hola${N()}! Empieza tu día sin humo`, airiSaludo());
+    else if (!nuevos.length && msNow === S.seenMs) airi('feliz', d ? `¡Hola${N()}! Llevas ${d} ${d === 1 ? 'día' : 'días'}` : `¡Hola${N()}! Empieza tu día ${sinX()}`, airiSaludo());
   }
 }
 // Juego: puntos y niveles con temática de bosque, calculados a partir de lo que hace el usuario
 const LEVELS = [[0,'Semilla'],[60,'Brote'],[150,'Hoja'],[300,'Rama'],[500,'Árbol'],[800,'Bosque'],[1200,'Selva']];
-const MISSIONS = [
+const MISSIONS_BASE = [
   ['Bebe 8 vasos de agua hoy', 'El agua ayuda a eliminar la nicotina.'],
   ['Camina 10 minutos al aire libre', 'Mueve el cuerpo y despeja la cabeza.'],
   ['Cuéntale a alguien que lo estás dejando', 'Decirlo en voz alta te compromete.'],
   ['Cambia el café por una infusión', 'El café es uno de los detonantes más comunes.'],
-  ['Limpia el coche o tu rincón de fumar', 'Quita lo que te recuerda al tabaco.'],
+  ['Limpia el coche o tu rincón de fumar', 'Quita lo que te recuerda al tabaco.', 'Tira los líquidos y cápsulas que te queden', 'Si no está a mano, es más fácil decir que no.'],
   ['Haz 3 respiraciones 4·4·6 sin antojo', 'Entrenar en calma ayuda en el momento difícil.'],
   ['Escribe un motivo nuevo para dejarlo', 'Añádelo en «Por qué lo dejas».'],
-  ['Lávate los dientes después de comer', 'Corta la costumbre del cigarrillo de sobremesa.'],
-  ['Guarda hoy el dinero del tabaco', 'Apártalo de verdad para tu meta.'],
+  ['Lávate los dientes después de comer', 'Corta la costumbre del cigarrillo de sobremesa.', 'Deja el móvil lejos de la cama esta noche', 'Vapear con el móvil en la mano es de las costumbres más fuertes.'],
+  ['Guarda hoy el dinero del tabaco', 'Apártalo de verdad para tu meta.', 'Guarda hoy el dinero del vaper', 'Apártalo de verdad para tu meta.'],
   ['Sube por las escaleras', 'Nota cómo tus pulmones ya responden mejor.'],
   ['Prepara un plan para tu momento difícil', 'Qué harás cuando llegue el antojo de siempre.'],
-  ['Date un capricho sano', 'Celebra tus días sin humo.'],
+  ['Date un capricho sano', 'Celebra cada día que llevas conseguido.'],
   ['Comparte tu progreso', 'Usa «Compartir mi progreso» en Hoy.'],
   ['Duerme 8 horas', 'El descanso reduce la ansiedad.']
 ];
@@ -549,7 +579,8 @@ function levelInfo(){
   const next = LEVELS[i + 1];
   return {n:i + 1, name:LEVELS[i][1], p, from:LEVELS[i][0], to:next ? next[0] : null, nextName:next ? next[1] : null};
 }
-const todayMission = () => MISSIONS[Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / D) % MISSIONS.length];
+// Las misiones con variante de vaper la usan cuando el usuario solo deja el vaper
+const todayMission = () => { const m = MISSIONS_BASE[Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / D) % MISSIONS_BASE.length]; return !smokes() && m.length > 2 ? m.slice(2, 4) : m.slice(0, 2); };
 function renderGame(){
   const lc = $('#levelCard'); if (lc){
     const L = levelInfo(), pc = L.to ? (L.p - L.from) / (L.to - L.from) * 100 : 100;
@@ -591,7 +622,7 @@ function renderInstall(){
     $('#installNo').onclick = () => { S.hideInstall = true; save(); renderInstall(); };
   } else el.innerHTML = '';
 }
-const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Otro'];
+const TRIGGERS = ['Café','Estrés','Después de comer','Alcohol','Social','Aburrimiento','Conducir','Con el móvil','Otro'];
 const TIPS = [
   'Bebe un vaso de agua fría a sorbos lentos.',
   'El antojo dura de 3 a 5 minutos. Ya llevas parte del camino.',
@@ -645,15 +676,15 @@ function viewLocked(root){
     <div class="card locked-hero">
       <h3 class="sec">${S.demo ? 'Tu prueba gratis ha terminado' : `${esc(S.profile.name)}, tu prueba gratis ha terminado`}</h3>
       <div class="airi-hero" style="margin:10px 0 14px"><img src="${AIRI.feliz}" alt="Airi"><p style="margin:0">Mira todo lo que llevas conseguido. Desbloquea Aire y seguimos juntos.</p></div>
-      <div class="row" style="align-items:flex-end; flex-wrap:wrap"><div><span class="big">${d}</span> <b style="font-family:var(--display); font-size:1.3rem">${d === 1 ? 'día' : 'días'} sin fumar</b></div></div>
+      <div class="row" style="align-items:flex-end; flex-wrap:wrap"><div><span class="big">${d}</span> <b style="font-family:var(--display); font-size:1.3rem">${d === 1 ? 'día' : 'días'} ${sinX()}</b></div></div>
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b class="num">${money(moneySaved())}</b><span>ahorrado</span></div>
-        <div class="stat"><b class="num">${int(cigsAvoided())}</b><span>cigarrillos evitados</span></div>
-        <div class="stat"><b class="num">${S.log.filter(e => e.ok).length}</b><span>antojos superados</span></div>
+        ${smokes() ? `<div class="stat"><b class="num">${int(cigsAvoided())}</b><span>cigarrillos evitados</span></div>` : `<div class="stat"><b class="num">${int(elapsed() / H)}</b><span>horas sin nicotina</span></div>`}
+        <div class="stat"><b class="num">${okCount()}</b><span>antojos superados</span></div>
       </div>
     </div>
     ${paywall('Sigue con tu contador, tus hitos, tu diario y tus metas. Para siempre.')}
-    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>El SOS de respiración sigue siendo gratis.</small></span></button>
+    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>${ganas()}</strong><small>El SOS de respiración sigue siendo gratis.</small></span></button>
   </section>`;
   $('#goSos').onclick = () => go('sos');
   bindPaywall(root);
@@ -675,7 +706,7 @@ function viewHoy(root){
       <span class="hero-bg" aria-hidden="true"></span>
       <canvas id="air" aria-hidden="true"></canvas>
       <div class="hero-inner">
-        <span class="hero-lead">${S.demo ? 'Ejemplo: ' : ''}${esc(p.name)} lleva sin fumar</span>
+        <span class="hero-lead">${S.demo ? 'Ejemplo: ' : ''}${esc(p.name)} lleva ${sinX()}</span>
         <div class="clock"><span class="big num" id="cDays" style="font-family:var(--display)">0</span><span class="unit" id="cUnit">días</span></div>
         <div class="clock-sub" id="cHms">00 h 00 min 00 s</div>
         <div class="hero-foot">Desde el ${new Date(p.quitAt).toLocaleDateString('es', {day:'numeric', month:'long', year:'numeric'})}</div>
@@ -683,10 +714,10 @@ function viewHoy(root){
     </div>
     <div class="stats">
       <div class="stat"><b class="num" id="sMoney">—</b><span>ahorrado</span></div>
-      <div class="stat"><b class="num" id="sCigs">—</b><span>cigarrillos evitados</span></div>
-      <div class="stat"><b class="num" id="sLife">—</b><span>de vida recuperada*</span></div>
+      <div class="stat"><b class="num" id="sCigs">—</b><span>${smokes() ? 'cigarrillos evitados' : 'horas sin nicotina'}</span></div>
+      <div class="stat"><b class="num" id="sLife">—</b><span>${smokes() ? 'de vida recuperada*' : 'antojos superados'}</span></div>
     </div>
-    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>Tengo ganas de fumar</strong><small>3 minutos de respiración guiada. El antojo pasa.</small></span></button>
+    <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>${ganas()}</strong><small>3 minutos de respiración guiada. El antojo pasa.</small></span></button>
     <div id="installCard"></div>
     <div class="card" id="levelCard"></div>
     <div class="card" id="missionCard"></div>
@@ -699,7 +730,7 @@ function viewHoy(root){
       <div id="goalMini" style="margin-top:8px"></div>
     </div>
     <button class="btn btn-ghost btn-block share-btn" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Compartir mi progreso</button>
-    <p class="foot-note">*Estimación de ${CONFIG.minPerCig} minutos por cigarrillo. Aire no sustituye el consejo médico.</p>
+    <p class="foot-note">${smokes() ? `*Estimación de ${CONFIG.minPerCig} minutos por cigarrillo. ` : ''}Aire no sustituye el consejo médico.</p>
   </section>`;
   $('#goSos').onclick = () => go('sos');
   $('#goMetas').onclick = () => go('metas');
@@ -716,11 +747,11 @@ function viewHoy(root){
     $('#cDays').textContent = d; $('#cUnit').textContent = d === 1 ? 'día' : 'días';
     $('#cHms').textContent = `${pad(Math.floor(e % D / H))} h ${pad(Math.floor(e % H / 60e3))} min ${pad(Math.floor(e % 60e3 / 1e3))} s`;
     $('#sMoney').textContent = money(moneySaved());
-    $('#sCigs').textContent = int(cigsAvoided());
-    $('#sLife').textContent = lifeText();
-    const nx = MILESTONES.find(m => m.ms > e);
+    $('#sCigs').textContent = int(smokes() ? cigsAvoided() : e / H);
+    $('#sLife').textContent = smokes() ? lifeText() : okCount();
+    const nx = ms().find(m => m.ms > e);
     if (nx){
-      const prev = [...MILESTONES].reverse().find(m => m.ms <= e)?.ms || 0;
+      const prev = [...ms()].reverse().find(m => m.ms <= e)?.ms || 0;
       const pc = Math.min(100, (e - prev) / (nx.ms - prev) * 100);
       $('#nextMs').innerHTML = `<div class="row"><h3>${nx.t}</h3><span class="pill pill-pro">en ${durText(nx.ms - e)}</span></div><p class="muted small" style="margin:6px 0 12px">Próximo hito. ${nx.d}</p><div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>`;
     }
@@ -772,23 +803,24 @@ function air(cv){
 
 function viewSalud(root){
   const e = elapsed();
-  const items = MILESTONES.map((m, i) => {
+  const MS = ms();
+  const items = MS.map((m, i) => {
     const done = e >= m.ms, locked = !hasPro() && i >= FREE_MILESTONES;
     const pc = Math.min(100, e / m.ms * 100);
-    const isNow = !done && (i === 0 || e >= MILESTONES[i-1].ms);
+    const isNow = !done && (i === 0 || e >= MS[i-1].ms);
     return `<li class="ms ${done ? 'done' : ''} ${isNow ? 'now' : ''} ${locked ? 'locked' : ''}">
       <span class="dot">${done ? CHECK : locked ? LOCK : ''}</span>
       <div><span class="when">${durText(m.ms)}${done ? ' · conseguido' : ' · faltan ' + durText(m.ms - e)}</span>
       <h4>${m.t}</h4>${locked ? `<span class="pro-tag">${LOCK} Descúbrelo con Aire Pro</span>` : `<p>${m.d}</p>`}${!done && !locked ? `<div class="bar"><i style="width:${pc.toFixed(1)}%"></i></div>` : ''}</div></li>`;
   }).join('');
-  const got = MILESTONES.filter(m => e >= m.ms).length;
+  const got = MS.filter(m => e >= m.ms).length;
   root.innerHTML = `<section class="view">
-    <div class="vh"><h2>${got} de ${MILESTONES.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde el último cigarrillo.</p></div>
-    <div class="card"><div class="lungs" role="img" aria-label="Tus pulmones se recuperan: ${Math.round(got / MILESTONES.length * 100)} %"><img class="gray" src="../img/pulmones.webp" alt=""><img class="color" src="../img/pulmones.webp" alt="" style="clip-path:inset(${100 - Math.round(got / MILESTONES.length * 100)}% 0 0 0)"></div>
-      <p class="lungs-cap">Tus pulmones se recuperan: ${Math.round(got / MILESTONES.length * 100)} %</p></div>
+    <div class="vh"><h2>${got} de ${MS.length} hitos conseguidos</h2><p>Así se recupera tu cuerpo desde ${smokes() ? 'el último cigarrillo' : 'la última calada al vaper'}.</p></div>
+    <div class="card"><div class="lungs" role="img" aria-label="Tus pulmones se recuperan: ${Math.round(got / MS.length * 100)} %"><img class="gray" src="../img/pulmones.webp" alt=""><img class="color" src="../img/pulmones.webp" alt="" style="clip-path:inset(${100 - Math.round(got / MS.length * 100)}% 0 0 0)"></div>
+      <p class="lungs-cap">Tus pulmones se recuperan: ${Math.round(got / MS.length * 100)} %</p></div>
     <div class="card"><ol class="timeline">${items}</ol></div>
-    ${hasPro() ? '' : paywall('Desbloquea los 10 hitos de salud, tu diario de antojos y las metas de ahorro.')}
-    <p class="foot-note">Fuentes: Organización Mundial de la Salud y CDC. Los plazos son aproximados y varían según la persona.</p>
+    ${hasPro() ? '' : paywall(`Desbloquea los ${MS.length} hitos de salud, tu diario de antojos y las metas de ahorro.`)}
+    <p class="foot-note">${smokes() ? 'Fuentes: Organización Mundial de la Salud y CDC.' : 'Basado en cómo actúan la nicotina y la abstinencia (CDC y NHS).'} Los plazos son aproximados y varían según la persona.</p>
   </section>`;
   bindPaywall(root);
 }
@@ -905,13 +937,13 @@ function viewDiario(root){
 
 function viewMetas(root){
   const saved = moneySaved(), g = S.goal, pc = Math.min(1, saved / g.price);
-  const perDayMoney = S.profile.perDay / S.profile.perPack * S.profile.packPrice;
-  const daysLeft = Math.max(0, Math.ceil((g.price - saved) / perDayMoney));
+  const perDay = perDayMoney();
+  const daysLeft = perDay > 0 ? Math.max(0, Math.ceil((g.price - saved) / perDay)) : 0;
   const R = 50, C = 2 * Math.PI * R;
   const TIER = {d1:1, d3:1, k1:1, w1:2, c100:2, w2:2, m1:3, k10:3, m3:3};
   const badges = [...BADGES].sort((a, b) => TIER[a.id] - TIER[b.id]).map((b, i) => { const got = b.ok(), tier = TIER[b.id]; return `<div class="badge ${got ? 'got' : ''} t${tier}"><span class="tier">${['Bronce','Plata','Oro'][tier - 1]}</span><span class="medal"><img src="${got ? (i % 2 ? AIRI.celebra : AIRI.medalla) : AIRI.feliz}" alt=""></span><b>${b.t}</b><small>${got ? b.s : 'Por conseguir · ' + b.s}</small></div>`; }).join('');
   root.innerHTML = `<section class="view">
-    <div class="vh"><h2>Tu dinero tiene destino</h2><p>Lo que no gastas en tabaco, a algo que te ilusione.</p></div>
+    <div class="vh"><h2>Tu dinero tiene destino</h2><p>Lo que no gastas en ${habitName()}, a algo que te ilusione.</p></div>
     <div class="card" style="${hasPro() ? '' : 'filter:blur(3px); opacity:.6'}" ${hasPro() ? '' : 'aria-hidden="true"'}>
       <div class="goal">
         <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
@@ -919,7 +951,7 @@ function viewMetas(root){
           <text x="60" y="66" text-anchor="middle" font-family="DM Mono, monospace" font-size="20" fill="var(--ink)">${Math.round(pc * 100)}%</text></svg>
         <div style="min-width:0"><h3 style="font-size:1.3rem">${esc(g.name)}</h3>
           <p class="muted small" style="margin:6px 0"><span class="num">${money(saved, 0)}</span> de <span class="num">${money(g.price, 0)}</span></p>
-          <p class="small" style="margin:0">${daysLeft ? `Lo tendrás en <b>${daysLeft} días</b> sin fumar.` : '<b>¡Meta conseguida! Date el capricho.</b>'}</p></div>
+          <p class="small" style="margin:0">${daysLeft ? `Lo tendrás en <b>${daysLeft} días</b> ${sinX()}.` : '<b>¡Meta conseguida! Date el capricho.</b>'}</p></div>
       </div>
       ${hasPro() ? `<div class="grid2" style="margin-top:16px">
         <div class="field"><label for="gName">Meta</label><input id="gName" value="${esc(g.name)}" maxlength="40"></div>
@@ -928,9 +960,9 @@ function viewMetas(root){
     </div>
     <div class="card"><div class="row"><h3 class="sec">Proyección de ahorro</h3></div>
       <div class="stats" style="margin-top:12px">
-        <div class="stat"><b class="num">${money(perDayMoney * 30, 0)}</b><span>en un mes</span></div>
-        <div class="stat"><b class="num">${money(perDayMoney * 182, 0)}</b><span>en 6 meses</span></div>
-        <div class="stat"><b class="num">${money(perDayMoney * 365, 0)}</b><span>en un año</span></div>
+        <div class="stat"><b class="num">${money(perDay * 30, 0)}</b><span>en un mes</span></div>
+        <div class="stat"><b class="num">${money(perDay * 182, 0)}</b><span>en 6 meses</span></div>
+        <div class="stat"><b class="num">${money(perDay * 365, 0)}</b><span>en un año</span></div>
       </div></div>
     <div class="card airi-hero"><img src="${AIRI.medalla}" alt="Airi con una medalla"><div><b>Logros: ${BADGES.filter(b => b.ok()).length} de ${BADGES.length} · Nivel ${levelInfo().n} ${levelInfo().name}</b><p>${BADGES.filter(b => b.ok()).length === BADGES.length ? '¡Los tienes todos! Airi está orgulloso de ti.' : `El siguiente: ${BADGES.find(b => !b.ok()).t}. ¡Vamos a por él!`}</p></div></div>
     <div class="badges">${badges}</div>
@@ -1020,22 +1052,28 @@ function bindPaywall(root){
 
 // ===== Perfil y ajustes =====
 function openProfile(fromDemo){
-  const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:5} : S.profile;
+  const p = fromDemo ? {name:'', quitAt:new Date().toISOString(), perDay:15, perPack:20, packPrice:5.5, currency:'EUR', years:5, habit:'tabaco', vapeWeek:15} : S.profile;
+  const h0 = p.habit || 'tabaco';
+  const HAB = [['tabaco','Tabaco','<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15h15v3H2zM19 15h1.5v3H19zM17 12c0-2 2-2 2-4s-2-2-2-4M20.5 12c0-1.5 1.5-1.5 1.5-3"/></svg>'],['vaper','Vaper','<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="9" width="6" height="13" rx="2"/><path d="M10 9V6h2v3M11 13v3M7 5c-1.5 0-2.5-1-2.5-2M15 5c1.5 0 3-1 3-2.5M11 3.5V2"/></svg>'],['ambos','Los dos','<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 18h10v2.5H1zM12 18h1v2.5h-1z"/><rect x="16" y="9" width="5" height="11.5" rx="1.8"/><path d="M17.7 9V6.5h1.6V9M6 15c0-1.5 1.5-1.5 1.5-3S6 10.5 6 9M18.5 4.5V2.5"/></svg>']];
   const dt = new Date(new Date(p.quitAt).getTime() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
   const cur = ['EUR','USD','MXN','COP','ARS','CLP','PEN','GBP'];
-  sheet(`${fromDemo ? `<img class="welcome-photo" src="../img/portada-pareja-900.webp" alt="Una mujer y un hombre espalda con espalda, respirando hondo"><img class="airi-welcome" src="${AIRI.feliz}" alt="Airi, la mascota de Aire">` : ''}<h2>${fromDemo ? 'Tu plan para dejar de fumar' : 'Editar mis datos'}</h2>
+  sheet(`${fromDemo ? `<img class="welcome-photo" src="../img/portada-pareja-900.webp" alt="Una mujer y un hombre espalda con espalda, respirando hondo"><img class="airi-welcome" src="${AIRI.feliz}" alt="Airi, la mascota de Aire">` : ''}<h2>${fromDemo ? 'Tu plan para dejarlo' : 'Editar mis datos'}</h2>
     <p class="muted" style="margin:0">Con estos datos calculamos tu ahorro y tu progreso. Se guardan solo en este dispositivo.</p>
     <form id="pf" style="display:flex; flex-direction:column; gap:12px">
+      <div class="field"><label id="lHab">¿Qué quieres dejar?</label><div class="habit-pick" role="radiogroup" aria-labelledby="lHab">${HAB.map(([v, t, i]) => `<button type="button" class="habit-opt" role="radio" data-h="${v}" aria-checked="${v === h0}"><span aria-hidden="true">${i}</span>${t}</button>`).join('')}</div></div>
       <div class="field"><label for="fName">Tu nombre</label><input id="fName" required maxlength="24" value="${esc(p.name)}" placeholder="Cómo quieres que te llamemos"></div>
       <div class="grid2">
         <div class="field"><label for="fAge">Edad <span class="muted" style="font-weight:400">(opcional)</span></label><input id="fAge" type="number" min="18" max="99" inputmode="numeric" value="${p.age || ''}" placeholder="Ej. 38"></div>
-        <div class="field"><label for="fYears">Años fumando <span class="muted" style="font-weight:400">(opcional)</span></label><input id="fYears" type="number" min="0" max="80" inputmode="numeric" value="${p.years || ''}" placeholder="Ej. 12"></div>
+        <div class="field"><label for="fYears"><span id="lYears">Años fumando</span> <span class="muted" style="font-weight:400">(opcional)</span></label><input id="fYears" type="number" min="0" max="80" inputmode="numeric" value="${p.years || ''}" placeholder="Ej. 12"></div>
       </div>
-      <div class="field"><label for="fQuit">Último cigarrillo</label><input id="fQuit" type="datetime-local" required value="${dt}"></div>
-      <div class="grid2">
+      <div class="field"><label for="fQuit" id="lQuit">Último cigarrillo</label><input id="fQuit" type="datetime-local" required value="${dt}"></div>
+      <div class="grid2" id="gTab">
         <div class="field"><label for="fDay">Cigarrillos al día</label><input id="fDay" type="number" min="1" max="100" required inputmode="numeric" value="${p.perDay}"></div>
         <div class="field"><label for="fPack">Por paquete</label><input id="fPack" type="number" min="1" max="60" required inputmode="numeric" value="${p.perPack}"></div>
         <div class="field"><label for="fPrice">Precio del paquete</label><input id="fPrice" type="number" min="0.1" step="0.01" required inputmode="decimal" value="${p.packPrice}"></div>
+      </div>
+      <div class="grid2">
+        <div class="field" id="gVape"><label for="fVape">Gasto en vaper a la semana</label><input id="fVape" type="number" min="1" step="0.5" required inputmode="decimal" value="${p.vapeWeek || 15}" placeholder="Líquidos, cápsulas…"></div>
         <div class="field"><label for="fCur">Moneda</label><select id="fCur">${cur.map(c => `<option ${c === p.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
       </div>
       ${fromDemo ? `<div class="field"><label>Por qué lo dejas <span class="muted" style="font-weight:400">(elige las que quieras)</span></label><div class="chips" id="fReasons">${REASONS.map(r => `<button type="button" class="chip" aria-pressed="false">${r}</button>`).join('')}</div></div>` : ''}
@@ -1043,12 +1081,25 @@ function openProfile(fromDemo){
       <button class="btn btn-primary btn-block" type="submit">${fromDemo ? 'Empezar mi contador' : 'Guardar'}</button>
       <button class="btn btn-ghost btn-block" type="button" data-close>Cancelar</button>
     </form>`);
+  // Muestra solo los campos del hábito elegido
+  let hab = h0;
+  const setHab = v => {
+    hab = v;
+    document.querySelectorAll('.habit-opt').forEach(b => b.setAttribute('aria-checked', b.dataset.h === v));
+    const t = v !== 'vaper', va = v !== 'tabaco';
+    $('#gTab').hidden = !t; $('#gTab').querySelectorAll('input').forEach(i => i.disabled = !t);
+    $('#gVape').hidden = !va; $('#fVape').disabled = !va;
+    $('#lQuit').textContent = {tabaco:'Último cigarrillo', vaper:'Última calada al vaper', ambos:'Último cigarrillo o calada'}[v];
+    $('#lYears').textContent = {tabaco:'Años fumando', vaper:'Años vapeando', ambos:'Años con el hábito'}[v];
+  };
+  document.querySelectorAll('.habit-opt').forEach(b => b.onclick = () => setHab(b.dataset.h));
+  setHab(h0);
   document.querySelectorAll('#fReasons .chip').forEach(c => c.onclick = () => c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'));
   $('#pf').onsubmit = ev => {
     ev.preventDefault();
     const q = new Date($('#fQuit').value);
-    if (isNaN(q) || q > new Date()) return toast('La fecha del último cigarrillo no puede estar en el futuro.');
-    const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:+$('#fYears').value || null, age:+$('#fAge').value || null};
+    if (isNaN(q) || q > new Date()) return toast('La fecha no puede estar en el futuro.');
+    const np = {name:$('#fName').value.trim(), quitAt:q.toISOString(), perDay:+$('#fDay').value, perPack:+$('#fPack').value, packPrice:+$('#fPrice').value, currency:$('#fCur').value, years:+$('#fYears').value || null, age:+$('#fAge').value || null, habit:hab, vapeWeek:+$('#fVape').value || p.vapeWeek || 15};
     const voice = $('#fVoice').checked;
     if (fromDemo){ S = {demo:false, pro:S.pro, proVia:S.proVia, license:S.license, trialStart:S.trialStart, theme:S.theme, profile:np, goal:{name:'Mi primer capricho', price:100}, log:[], checkins:{}, reasons:[...document.querySelectorAll('#fReasons .chip[aria-pressed="true"]')].map(c => c.textContent)}; }
     else S.profile = np;
@@ -1144,12 +1195,13 @@ async function drawShareCard(){
   const d = Math.floor(elapsed() / D);
   x.fillStyle = '#FFFFFF'; x.textBaseline = 'alphabetic';
   x.font = `800 64px ${disp}`; x.fillText('Aire', 90, 150);
-  x.font = `600 46px ${body}`; x.globalAlpha = .9; x.fillText(`${S.profile.name || 'Llevo'} lleva sin fumar`.replace(/^Llevo lleva/, 'Llevo'), 90, 400); x.globalAlpha = 1;
+  x.font = `600 46px ${body}`; x.globalAlpha = .9; x.fillText(`${S.profile.name || 'Llevo'} lleva ${sinX()}`.replace(/^Llevo lleva/, 'Llevo'), 90, 400); x.globalAlpha = 1;
   x.font = `800 ${d > 99 ? 330 : 420}px ${disp}`; x.fillText(String(d), 80, 760);
   x.font = `700 92px ${disp}`; x.fillText(d === 1 ? 'día' : 'días', 90, 880);
   x.fillStyle = 'rgba(255,255,255,.14)'; x.fillRect(90, 950, W - 180, 2);
   x.fillStyle = '#FFFFFF';
-  const stats = [[money(moneySaved(), 0), 'ahorrado'], [int(cigsAvoided()), 'cigarrillos evitados'], [lifeText(), 'de vida recuperada']];
+  const stats = smokes() ? [[money(moneySaved(), 0), 'ahorrado'], [int(cigsAvoided()), 'cigarrillos evitados'], [lifeText(), 'de vida recuperada']]
+    : [[money(moneySaved(), 0), 'ahorrado'], [int(elapsed() / H), 'horas sin nicotina'], [String(okCount()), 'antojos superados']];
   stats.forEach(([v, l], i) => { const sx = 90 + i * 310; x.font = `800 64px ${disp}`; x.fillText(v, sx, 1060); x.font = `500 32px ${body}`; x.globalAlpha = .82; x.fillText(l, sx, 1110); x.globalAlpha = 1; });
   x.font = `600 34px ${body}`; x.globalAlpha = .8; x.fillText('aire.kreadigitalstudio.es', 90, 1260); x.globalAlpha = 1;
   return new Promise(r => c.toBlob(r, 'image/png'));
@@ -1161,8 +1213,8 @@ async function openShare(){
   const canShare = !!(navigator.canShare && navigator.canShare({files:[file]}));
   const w = $('#shWrap'); if (!w) return;
   w.previousElementSibling.textContent = canShare ? 'Contarlo te compromete más. Compártelo en tus redes o con quien te apoya.' : 'Contarlo te compromete más. Mantén pulsada la imagen para guardarla y compartirla.';
-  w.innerHTML = `<img class="share-img" src="${url}" alt="Tarjeta con tus días sin fumar y tu ahorro">${canShare ? '<button class="btn btn-primary btn-block" id="shGo">Compartir</button>' : ''}`;
-  const b = $('#shGo'); if (b) b.onclick = () => navigator.share({files:[file], text:`Llevo ${Math.floor(elapsed() / D)} días sin fumar con Aire.`}).catch(() => {});
+  w.innerHTML = `<img class="share-img" src="${url}" alt="Tarjeta con tus días ${sinX()} y tu ahorro">${canShare ? '<button class="btn btn-primary btn-block" id="shGo">Compartir</button>' : ''}`;
+  const b = $('#shGo'); if (b) b.onclick = () => navigator.share({files:[file], text:`Llevo ${Math.floor(elapsed() / D)} días ${sinX()} con Aire.`}).catch(() => {});
 }
 function sheet(html){
   $('#sheetRoot').innerHTML = `<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
