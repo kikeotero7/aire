@@ -324,6 +324,14 @@ button.badge:active{transform:scale(.96)}
 .badge:focus-visible, #metaAiri:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 #metaAiri{cursor:pointer}
 .badge .medal.bounce, .airi-hero img.bounce{animation:airiBounce .6s cubic-bezier(.3,1.6,.5,1)}
+.vp-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; max-height:46vh; overflow:auto}
+.vp{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; padding:8px; border:1px solid var(--line); border-radius:14px; background:var(--surface)}
+.vp.on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.vp-pick{all:unset; cursor:pointer; display:block; min-width:0; padding:4px 6px}
+.vp-pick b{display:block; font-size:.95rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.vp-pick small{color:var(--muted); font-size:.8rem}
+.vp.on .vp-pick b::after{content:" ✓"; color:var(--accent)}
+.vp-play{min-height:40px; padding:0 12px; font-size:.85rem}
 </style>
 </head>
 <body>
@@ -540,14 +548,18 @@ let airiQ = [], airiOn = false, airiT;
 // Nombre del usuario para personalizar los mensajes de Airi (no en el ejemplo)
 const N = () => (!S.demo && S.profile?.name) ? ', ' + S.profile.name : '';
 // Airi habla en voz alta con la voz en español del propio móvil
-function speak(text, interrupt = true){
-  if (S.voice === false || !('speechSynthesis' in window)) return;
+// Tonos de Airi: cambian la altura y la velocidad de la voz elegida
+const TONOS = { dulce:{t:'Dulce', pitch:1.35, rate:1.0}, alegre:{t:'Alegre', pitch:1.25, rate:1.02}, natural:{t:'Natural', pitch:1.0, rate:1.0}, calma:{t:'Calmada', pitch:0.95, rate:0.9} };
+const esVoices = () => { try { return speechSynthesis.getVoices().filter(x => /^es/i.test(x.lang)); } catch(e){ return []; } };
+function speak(text, interrupt = true, voiceName, tono){
+  if ((S.voice === false && !voiceName) || !('speechSynthesis' in window)) return;
   try {
     const u = new SpeechSynthesisUtterance(String(text).replace(/[^\p{L}\p{N}\s.,;:¡!¿?'-]/gu, ' '));
-    const vs = speechSynthesis.getVoices();
-    const v = vs.find(x => /^es[-_]ES/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
+    const vs = esVoices(), want = voiceName || S.voiceName;
+    const v = (want && vs.find(x => x.name === want)) || vs.find(x => /^es[-_]ES/i.test(x.lang)) || vs[0];
     if (v) u.voice = v;
-    u.lang = v?.lang || 'es-ES'; u.rate = 1.02; u.pitch = 1.25;
+    const tn = TONOS[tono || S.voiceTone] || TONOS.alegre;
+    u.lang = v?.lang || 'es-ES'; u.rate = tn.rate; u.pitch = tn.pitch;
     if (interrupt) speechSynthesis.cancel();
     speechSynthesis.speak(u);
   } catch(e){}
@@ -1238,12 +1250,33 @@ function openProfile(fromDemo){
     go('hoy');
   };
 }
+// Selector de voz: lista las voces en español del propio móvil, se prueban y se elige una
+function openVoicePicker(){
+  const muestra = `¡Hola${N()}! Soy Airi. Estoy aquí para ayudarte en cada antojo.`;
+  const draw = () => {
+    const vs = esVoices(), cur = S.voiceName || (vs.find(x => /^es[-_]ES/i.test(x.lang)) || vs[0])?.name, tono = S.voiceTone || 'alegre';
+    $('#vpList').innerHTML = vs.length ? vs.map((v, i) => `<li class="vp ${v.name === cur ? 'on' : ''}"><button class="vp-pick" data-i="${i}" aria-pressed="${v.name === cur}"><b>${esc(v.name.replace(/Microsoft |Google |\(.*?\)|- Spanish.*$/g, '').trim() || 'Voz ' + (i + 1))}</b><small>${esc(v.lang)}${v.localService ? '' : ' · necesita internet'}</small></button><button class="btn btn-ghost vp-play" data-i="${i}" aria-label="Probar">▶ Probar</button></li>`).join('')
+      : '<li class="muted small">Tu móvil no tiene voces en español instaladas. En Ajustes del teléfono → Idioma → Texto a voz puedes descargarlas.</li>';
+    document.querySelectorAll('#vpTone .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.t === tono));
+    document.querySelectorAll('.vp-play').forEach(b => b.onclick = () => speak(muestra, true, vs[+b.dataset.i].name, tono));
+    document.querySelectorAll('.vp-pick').forEach(b => b.onclick = () => { S.voiceName = vs[+b.dataset.i].name; if (S.voice === false) S.voice = true; save(); speak(muestra, true, S.voiceName); draw(); });
+  };
+  sheet(`<h2>La voz de Airi</h2><p class="muted" style="margin:0">Estas son las voces en español de tu móvil. Pulsa ▶ para escucharlas y toca el nombre para elegir.</p>
+    <div class="field"><label>Tono</label><div class="chips" id="vpTone">${Object.entries(TONOS).map(([k, t]) => `<button type="button" class="chip" data-t="${k}" aria-pressed="false">${t.t}</button>`).join('')}</div></div>
+    <ul class="vp-list" id="vpList"></ul>
+    <button class="btn btn-primary btn-block" data-close>Listo</button>`);
+  document.querySelectorAll('#vpTone .chip').forEach(c => c.onclick = () => { S.voiceTone = c.dataset.t; save(); speak(muestra, true, undefined, S.voiceTone); draw(); });
+  draw();
+  // En Android las voces se cargan un momento después
+  try { speechSynthesis.onvoiceschanged = () => { if ($('#vpList')) draw(); }; } catch(e){}
+}
 function openSettings(){
   sheet(`<h2>Ajustes</h2>
     <button class="btn btn-ghost btn-block" id="stProfile">${S.demo ? 'Crear mi plan' : 'Editar mis datos'}</button>
     <button class="btn btn-ghost btn-block" id="stReasons">Mis razones para dejarlo</button>
     <button class="btn btn-ghost btn-block" id="stBackup">Copia de seguridad</button>
     <button class="btn btn-ghost btn-block" id="stVoice">Voz de Airi: ${S.voice === false ? 'desactivada' : 'activada'}</button>
+    ${'speechSynthesis' in window ? '<button class="btn btn-ghost btn-block" id="stVoicePick">Elegir la voz de Airi</button>' : ''}
     <button class="btn btn-ghost btn-block" id="stTheme">Tema: ${S.theme === 'dark' ? 'oscuro' : S.theme === 'light' ? 'claro' : 'automático'}</button>
     ${!S.pro ? `<p class="small muted" style="margin:0">${trialLeft() ? `Prueba gratis: ${trialDaysLeft() === 1 ? 'queda 1 día' : `quedan ${trialDaysLeft()} días`}.` : 'Tu prueba gratis ha terminado.'}</p>` : ''}
     ${S.pro ? `<p class="small muted" style="margin:0">Aire Pro está activado en este dispositivo${S.proVia ? ' con un código de invitación' : ''}.${S.license ? ` Licencia <span class="num">…${esc(S.license.key.slice(-6))}</span>` : ''}</p>` : ''}
@@ -1253,6 +1286,7 @@ function openSettings(){
     <p class="foot-note">Aire · una app de KREA Digital Studio<br><a href="../legal/#aviso" target="_blank" rel="noopener">Aviso legal</a> · <a href="../legal/#privacidad" target="_blank" rel="noopener">Privacidad</a> · <a href="../legal/#condiciones" target="_blank" rel="noopener">Condiciones</a></p>`);
   $('#stProfile').onclick = () => { closeSheet(); openProfile(S.demo); };
   $('#stTheme').onclick = () => { cycleTheme(); openSettings(); };
+  const vp = $('#stVoicePick'); if (vp) vp.onclick = () => { closeSheet(); openVoicePicker(); };
   $('#stVoice').onclick = () => { S.voice = S.voice === false; save(); if (S.voice) speak(`Hola${N()}. Ya puedo hablarte.`); openSettings(); };
   $('#stReasons').onclick = openReasons;
   $('#stBackup').onclick = openBackup;
