@@ -21,7 +21,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - Cobro: Lemon Squeezy (vendedor registrado, gestiona el IVA). Aviso de ventas por Telegram, sin datos personales.
 
 ## Infraestructura del cliente (Kike)
-- **Norma de KREA para todos los clientes:** cada proyecto se publica como `cliente.kreadigitalstudio.es` (aquí `aire.kreadigitalstudio.es`) y así se muestra en mensajes, webs y fichas. Pendiente al hacerla pública: marcar "Enforce HTTPS" en GitHub Pages.
+- **Norma de KREA:** cada proyecto se publica con su propio nombre delante: `nombre-del-proyecto.kreadigitalstudio.es`. Aquí: `aire.kreadigitalstudio.es`. Pendiente al hacerla pública: marcar "Enforce HTTPS" en GitHub Pages.
 - Dominio propio: **kreadigitalstudio.es**. Los subdominios se crean en el proveedor del dominio.
 - **OVHcloud** (cuota anual): proveedor del dominio y del DNS; permite crear muchos subdominios.
 - **HostGator**: plan de alojamiento activo (plan B para alojar archivos y correo).
