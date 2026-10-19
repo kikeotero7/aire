@@ -57,7 +57,7 @@ Una app de KREA Digital Studio.
 **Imágenes (carpeta `store/`):**
 - Icono 512 × 512: `store/icono-512.png`
 - Imagen destacada 1024 × 500: `store/imagen-destacada-1024x500.png`
-- Capturas de teléfono 1080 × 1920: `store/captura-1.png` … `store/captura-5.png`
+- Capturas de teléfono 1080 × 1920: `store/captura-1.png` … `store/captura-5.png`, más el SOS con la imagen de los pulmones: `store/captura-sos-claro.png` y `store/captura-sos-oscuro.png`
 
 ## 4. Formularios de Play Console (respuestas)
 - **Seguridad de los datos:** la app no recopila ni comparte datos personales; todo se guarda en el dispositivo.
