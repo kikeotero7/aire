@@ -312,6 +312,11 @@ textarea.code{width:100%; min-height:110px; border:1px solid var(--line); border
 .flash{animation:flash 1.6s ease}
 @keyframes flash{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 4px var(--accent)}}
 @media (max-width:380px){ .pill-word{display:none} .top .pill{font-size:.7rem; padding:4px 9px} .top-actions{gap:6px} .brand{font-size:1.2rem; gap:8px} }
+.badge{font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .12s}
+.badge:active{transform:scale(.96)}
+.badge:focus-visible, #metaAiri:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+#metaAiri{cursor:pointer}
+.badge .medal.bounce, .airi-hero img.bounce{animation:airiBounce .6s cubic-bezier(.3,1.6,.5,1)}
 </style>
 
 <div class="app" id="app">
@@ -486,6 +491,29 @@ const BADGES = [
   {id:'k10', t:'Mente fuerte', s:'10 antojos superados', ok:() => S.log.filter(e => e.ok).length >= 10, m:'10×'}
 ];
 
+// Lo que dice Airi al tocar cada logro: felicitación si ya lo tiene, ánimo y lo que falta si no
+const BADGE_TALK = {
+  d1:{ms:D, ok:'Tu primer día libre. El más difícil ya es historia.'},
+  d3:{ms:3*D, ok:'Superaste las 72 horas, el pico de la abstinencia. A partir de aquí, todo mejora.'},
+  w1:{ms:7*D, ok:'Una semana entera. Tu cuerpo ya nota el cambio.'},
+  w2:{ms:14*D, ok:'Dos semanas seguidas. Esto ya es un hábito nuevo.'},
+  m1:{ms:30*D, ok:'Un mes libre. Eres un ejemplo para mucha gente.'},
+  m3:{ms:90*D, ok:'Tres meses. Lo has conseguido de verdad.'},
+  c100:{ok:'Cien veces que has dicho que no. Eso es fuerza de voluntad.'},
+  k1:{n:1, ok:'Tu primer antojo superado con el SOS. Ya sabes que puedes.'},
+  k10:{n:10, ok:'Diez antojos superados. Tu mente es más fuerte que las ganas.'}
+};
+function badgeTalk(b){
+  const t = BADGE_TALK[b.id];
+  if (b.ok()) return airiNow('medalla', `¡${b.t}${N()}!`, t.ok);
+  let falta;
+  if (t.ms) falta = `Te faltan ${durText(t.ms - elapsed())} para conseguirlo.`;
+  else if (t.n) { const k = t.n - okCount(); falta = `Supera ${k} ${k === 1 ? 'antojo' : 'antojos'} más con el SOS.`; }
+  else falta = smokes() ? `Te faltan ${Math.ceil(100 - cigsAvoided())} cigarrillos por evitar.` : `Te faltan ${durText(100*H - elapsed())} sin nicotina.`;
+  airiNow('feliz', `A por «${b.t}»${N()}`, `${falta} Yo te acompaño.`);
+}
+// Airi da un saltito al tocarla
+const hop = el => { el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce'); };
 const REASONS = ['Mi salud','Mi familia','Ahorrar','Respirar mejor','Hacer deporte','Dar ejemplo','Oler bien','Ser libre','Mi embarazo','Mi piel'];
 const MOODS = [
   {id:'bien', t:'Bien', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9.5h.01M15 9.5h.01"/></svg>'},
@@ -534,6 +562,8 @@ function airi(pose, title, text, action){
   airiQ.push({pose, title, text, action});
   if (!airiOn) airiNext();
 }
+// Al tocar a Airi: lo nuevo sustituye a lo que esté diciendo
+function airiNow(pose, title, text, action){ airiQ.length = 0; clearTimeout(airiT); airiOn = false; airi(pose, title, text, action); }
 function airiNext(){
   const it = airiQ.shift(); if (!it){ airiOn = false; return; }
   airiOn = true;
@@ -680,7 +710,7 @@ function renderGame(){
       <div class="pts"><span class="num">${L.p} puntos</span><span>${L.to ? `${L.to - L.p} para ${L.nextName}` : '¡Nivel máximo!'}</span></div></div></div>`;
     $('#airiTap').onclick = e => {
       const b = e.currentTarget; b.classList.remove('bounce'); void b.offsetWidth; b.classList.add('bounce');
-      airi('feliz', `¡Hola${N()}!`, airiSaludo());
+      airiNow('feliz', `¡Hola${N()}!`, airiSaludo());
     };
   }
   const mc = $('#missionCard'); if (mc){
@@ -766,7 +796,7 @@ function viewLocked(root){
   root.innerHTML = `<section class="view">
     <div class="card locked-hero">
       <h3 class="sec">${S.demo ? 'Tu prueba gratis ha terminado' : `${esc(S.profile.name)}, tu prueba gratis ha terminado`}</h3>
-      <div class="airi-hero" style="margin:10px 0 14px"><img src="${AIRI.feliz}" alt="Airi"><p style="margin:0">Mira todo lo que llevas conseguido. Desbloquea Aire y seguimos juntos.</p></div>
+      <div class="airi-hero" id="lockAiri" style="margin:10px 0 14px; cursor:pointer"><img src="${AIRI.feliz}" alt="Airi"><p style="margin:0">Mira todo lo que llevas conseguido. Desbloquea Aire y seguimos juntos.</p></div>
       <div class="row" style="align-items:flex-end; flex-wrap:wrap"><div><span class="big">${d}</span> <b style="font-family:var(--display); font-size:1.3rem">${d === 1 ? 'día' : 'días'} ${sinX()}</b></div></div>
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b class="num">${money(moneySaved())}</b><span>ahorrado</span></div>
@@ -778,6 +808,7 @@ function viewLocked(root){
     <button class="sos-btn" id="goSos"><span class="ring">SOS</span><span><strong>${ganas()}</strong><small>El SOS de respiración sigue siendo gratis.</small></span></button>
   </section>`;
   $('#goSos').onclick = () => go('sos');
+  $('#lockAiri').onclick = e => { hop(e.currentTarget.querySelector('img')); airiNow('feliz', `Mira lo que llevas${N()}`, `${d} ${d === 1 ? 'día' : 'días'} ${sinX()} y ${money(moneySaved(), 0)} ahorrados. Sigamos juntos.`); };
   bindPaywall(root);
 }
 function openPro(){
@@ -1032,7 +1063,7 @@ function viewMetas(root){
   const daysLeft = perDay > 0 ? Math.max(0, Math.ceil((g.price - saved) / perDay)) : 0;
   const R = 50, C = 2 * Math.PI * R;
   const TIER = {d1:1, d3:1, k1:1, w1:2, c100:2, w2:2, m1:3, k10:3, m3:3};
-  const badges = [...BADGES].sort((a, b) => TIER[a.id] - TIER[b.id]).map((b, i) => { const got = b.ok(), tier = TIER[b.id]; return `<div class="badge ${got ? 'got' : ''} t${tier}"><span class="tier">${['Bronce','Plata','Oro'][tier - 1]}</span><span class="medal"><img src="${got ? (i % 2 ? AIRI.celebra : AIRI.medalla) : AIRI.feliz}" alt=""></span><b>${b.t}</b><small>${got ? b.s : 'Por conseguir · ' + b.s}</small></div>`; }).join('');
+  const badges = [...BADGES].sort((a, b) => TIER[a.id] - TIER[b.id]).map((b, i) => { const got = b.ok(), tier = TIER[b.id]; return `<button type="button" class="badge ${got ? 'got' : ''} t${tier}" data-b="${b.id}" aria-label="${esc(b.t)}: toca para escuchar a Airi"><span class="tier">${['Bronce','Plata','Oro'][tier - 1]}</span><span class="medal"><img src="${got ? (i % 2 ? AIRI.celebra : AIRI.medalla) : AIRI.feliz}" alt=""></span><b>${b.t}</b><small>${got ? b.s : 'Por conseguir · ' + b.s}</small></button>`; }).join('');
   root.innerHTML = `<section class="view">
     <div class="vh"><h2>Tu dinero tiene destino</h2><p>Lo que no gastas en ${habitName()}, a algo que te ilusione.</p></div>
     <div class="card" style="${hasPro() ? '' : 'filter:blur(3px); opacity:.6'}" ${hasPro() ? '' : 'aria-hidden="true"'}>
@@ -1055,10 +1086,15 @@ function viewMetas(root){
         <div class="stat"><b class="num">${money(perDay * 182, 0)}</b><span>en 6 meses</span></div>
         <div class="stat"><b class="num">${money(perDay * 365, 0)}</b><span>en un año</span></div>
       </div></div>
-    <div class="card airi-hero"><img src="${AIRI.medalla}" alt="Airi con una medalla"><div><b>Logros: ${BADGES.filter(b => b.ok()).length} de ${BADGES.length} · Nivel ${levelInfo().n} ${levelInfo().name}</b><p>${BADGES.filter(b => b.ok()).length === BADGES.length ? '¡Los tienes todos! Airi está orgulloso de ti.' : `El siguiente: ${BADGES.find(b => !b.ok()).t}. ¡Vamos a por él!`}</p></div></div>
+    <div class="card airi-hero" id="metaAiri" role="button" tabindex="0" aria-label="Toca a Airi"><img src="${AIRI.medalla}" alt="Airi con una medalla"><div><b>Logros: ${BADGES.filter(b => b.ok()).length} de ${BADGES.length} · Nivel ${levelInfo().n} ${levelInfo().name}</b><p>${BADGES.filter(b => b.ok()).length === BADGES.length ? '¡Los tienes todos! Airi está orgulloso de ti.' : `El siguiente: ${BADGES.find(b => !b.ok()).t}. ¡Vamos a por él!`}</p></div></div>
+    <p class="small muted" style="margin:0; text-align:center">Toca a Airi en cada logro y te dirá algo.</p>
     <div class="badges">${badges}</div>
     ${hasPro() ? '' : paywall('Pon nombre a tu meta y mira cuántos días te faltan para conseguirla.')}
   </section>`;
+  root.querySelectorAll('.badge[data-b]').forEach(el => el.onclick = () => { hop(el.querySelector('.medal')); badgeTalk(BADGES.find(x => x.id === el.dataset.b)); });
+  const ma = $('#metaAiri'), maTalk = () => { hop(ma.querySelector('img')); const got = BADGES.filter(b => b.ok()).length, nx = BADGES.find(b => !b.ok());
+    airiNow('celebra', `Llevas ${got} de ${BADGES.length} logros${N()}`, nx ? `El siguiente es «${nx.t}». ¡Vamos a por él!` : '¡Los tienes todos! Estoy muy orgulloso de ti.'); };
+  ma.onclick = maTalk; ma.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); maTalk(); } };
   const gs = $('#gSave');
   if (gs) gs.onclick = () => {
     const n = $('#gName').value.trim(), p = parseFloat($('#gPrice').value);
