@@ -63,6 +63,8 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - Portada: pareja fusionada (`img/portada-fusionada*.webp`); pareja de cuerpo entero en el SOS y la bienvenida.
 - Airi habla en voz alta y usa el nombre del usuario; ficha inicial con edad y años fumando.
 - Modo juego, reto del día, logros bronce/plata/oro, instalación con un toque y vista previa en WhatsApp.
+- **Avisos dentro de la app (sin servidor):** campana con número de pendientes (check-in, reto del día, hito nuevo de las últimas 24 h, motivos, fin de prueba) y numerito en el icono instalado (Badging API). Si vuelve tras 2+ días, Airi pregunta "¿Sigues…?" (sí / desliz → seguir o reiniciar). Desde las 17:00 recuerda el check-in una vez al día. Estado: `S.lastSeen`, `S.ciRemind`.
+- Siguiente en avisos: notificaciones con la app cerrada (Web Push + Cloudflare Worker gratis; el móvil compone el texto, el servidor no recibe datos).
 - Código de invitación: AIRE2026 (solo su huella en el código).
 - **Tabaco, vaper o los dos:** la ficha inicial pregunta qué quiere dejar con tres botones grandes. Con vaper pide el gasto semanal y la app cambia contador ("sin vapear"), estadísticas (horas sin nicotina, antojos superados), 10 hitos propios del vaper (`MS_VAPE`), misiones y textos. Perfiles antiguos = tabaco. Nunca se recomienda el vaper para dejar de fumar.
 - **Siguiente:** prueba con conocidos SIN código durante 15 días, recogiendo opiniones; después se decide si se usa AIRE2026 y se pasa a cobrar. Si gusta: alta de autónomo, Google Play Console (25 $ pago único) y cobro. Después: captura completa de la fusionada, más poses de Airi, Google Play Console y alta de autónomo.
