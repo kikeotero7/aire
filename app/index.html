@@ -333,6 +333,8 @@ button.badge:active{transform:scale(.96)}
 .vp-pick small{color:var(--muted); font-size:.8rem}
 .vp.on .vp-pick b::after{content:" ✓"; color:var(--accent)}
 .vp-play{min-height:40px; padding:0 12px; font-size:.85rem}
+.notif.new .ni{position:relative}
+.notif.new .ni::after{content:""; position:absolute; top:-3px; right:-3px; width:12px; height:12px; border-radius:50%; background:var(--sos); border:2px solid var(--surface)}
 </style>
 </head>
 <body>
@@ -625,19 +627,21 @@ function focusCard(id){
   setTimeout(show, 120);
 }
 function notifs(){
-  if (S.demo) return [{ico:'motivo', t:'Crea tu plan', d:'Pon tus datos y empieza tu contador.', run:() => openProfile(true)}];
+  if (S.demo) return [{k:'plan', ico:'motivo', t:'Crea tu plan', d:'Pon tus datos y empieza tu contador.', run:() => openProfile(true)}];
   if (!hasPro()) return [];
   const out = [], hoyK = dayKey(Date.now()), e = elapsed();
-  if (!S.checkins[hoyK]) out.push({ico:'check', t:'Haz tu check-in de hoy', d:'Cuéntale a Airi cómo llevas el día.', run:() => focusCard('#checkin')});
-  if (!S.missions?.[hoyK]) out.push({ico:'reto', t:'Reto del día', d:todayMission()[0], run:() => focusCard('#missionCard')});
+  if (!S.checkins[hoyK]) out.push({k:'ci-' + hoyK, ico:'check', t:'Haz tu check-in de hoy', d:'Cuéntale a Airi cómo llevas el día.', run:() => focusCard('#checkin')});
+  if (!S.missions?.[hoyK]) out.push({k:'reto-' + hoyK, ico:'reto', t:'Reto del día', d:todayMission()[0], run:() => focusCard('#missionCard')});
   const m = [...ms()].reverse().find(x => e >= x.ms);
-  if (m && e - m.ms < D) out.push({ico:'hito', t:'Nuevo hito: ' + m.t, d:m.d, run:() => go('salud')});
-  if (!S.reasons.length) out.push({ico:'motivo', t:'Añade por qué lo dejas', d:'Airi te lo recordará en los antojos.', run:openReasons});
-  if (!S.pro && trialDaysLeft() <= 3) out.push({ico:'prueba', t:`Te ${trialDaysLeft() === 1 ? 'queda 1 día' : `quedan ${trialDaysLeft()} días`} de prueba`, d:'Desbloquea Aire para siempre con un pago único.', run:openPro});
+  if (m && e - m.ms < D) out.push({k:'hito-' + m.ms, ico:'hito', t:'Nuevo hito: ' + m.t, d:m.d, run:() => go('salud')});
+  if (!S.reasons.length) out.push({k:'motivo', ico:'motivo', t:'Añade por qué lo dejas', d:'Airi te lo recordará en los antojos.', run:openReasons});
+  if (!S.pro && trialDaysLeft() <= 3) out.push({k:'prueba-' + trialDaysLeft(), ico:'prueba', t:`Te ${trialDaysLeft() === 1 ? 'queda 1 día' : `quedan ${trialDaysLeft()} días`} de prueba`, d:'Desbloquea Aire para siempre con un pago único.', run:openPro});
   return out;
 }
+// El número de la campana cuenta solo los avisos que aún no se han visto
+const unseen = () => notifs().filter(n => !S.notifSeen?.[n.k]);
 function updateBell(){
-  const n = notifs().length, el = $('#bellN'); if (!el) return;
+  const n = unseen().length, el = $('#bellN'); if (!el) return;
   el.hidden = !n; el.textContent = n;
   $('#bellBtn').setAttribute('aria-label', n ? `Avisos: ${n} pendientes` : 'Avisos');
   // Numerito en el icono de la app instalada (Android y ordenador)
@@ -645,7 +649,12 @@ function updateBell(){
 }
 function openNotifs(){
   const list = notifs();
-  sheet(`<h2>Avisos</h2>${list.length ? `<ul class="notif-list">${list.map((n, i) => `<li><button class="notif" data-i="${i}"><span class="ni">${ICO[n.ico]}</span><span><b>${esc(n.t)}</b><small>${esc(n.d)}</small></span><span class="go" aria-hidden="true">›</span></button></li>`).join('')}</ul>`
+  // Al abrir la campana, todo lo que aparece queda visto y el número se borra
+  const seen = {}; list.forEach(n => seen[n.k] = true);
+  const isNew = n => !S.notifSeen?.[n.k];
+  const fresh = list.map(isNew);
+  S.notifSeen = seen; save(); updateBell();
+  sheet(`<h2>Avisos</h2>${list.length ? `<ul class="notif-list">${list.map((n, i) => `<li><button class="notif ${fresh[i] ? 'new' : ''}" data-i="${i}"><span class="ni">${ICO[n.ico]}</span><span><b>${esc(n.t)}</b><small>${esc(n.d)}</small></span><span class="go" aria-hidden="true">›</span></button></li>`).join('')}</ul>`
     : `<div class="notif-empty"><img src="${AIRI.celebra}" alt="Airi celebrando"><b>¡Todo al día${N()}!</b><p class="muted small" style="margin:0">No tienes nada pendiente. Sigue así.</p></div>`}
     <button class="btn btn-ghost btn-block" data-close>Cerrar</button>`);
   document.querySelectorAll('.notif').forEach(b => b.onclick = () => { closeSheet(); list[+b.dataset.i].run(); });
