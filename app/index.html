@@ -76,10 +76,10 @@ header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; backgr
 
 /* Contador principal */
 .hero{position:relative; overflow:hidden; background:var(--hero); color:var(--on-hero); border:0; padding:22px 20px 20px; isolation:isolate}
-.hero{padding-top:150px}
-.hero .hero-bg{position:absolute; inset:0 0 auto 0; height:190px; z-index:-1; background:url('../img/portada-fusionada-900.webp') 56% 24% / cover no-repeat}
-.hero .hero-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--hero) 70%, transparent) 75%, var(--hero) 100%)}
-.hero-lead{font-weight:600; font-size:1rem; opacity:.92}
+.hero{padding-top:205px}
+.hero .hero-bg{position:absolute; inset:0 0 auto 0; height:262px; z-index:-1; background:url('../img/portada-fusionada-900.webp') 56% 0% / cover no-repeat}
+.hero .hero-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--hero) 12%, transparent) 62%, color-mix(in srgb, var(--hero) 32%, transparent) 72%, color-mix(in srgb, var(--hero) 58%, transparent) 82%, color-mix(in srgb, var(--hero) 85%, transparent) 92%, var(--hero) 100%)}
+.hero-lead{font-weight:600; font-size:1rem; opacity:.95; text-shadow:0 1px 8px color-mix(in srgb, var(--hero) 80%, transparent)}
 .hero .label{color:inherit; opacity:.8}
 .hero canvas{position:absolute; inset:0; width:100%; height:100%; opacity:.35; pointer-events:none}
 .hero-inner{position:relative; display:flex; flex-direction:column; gap:10px}
