@@ -26,17 +26,18 @@
   --body:'Figtree', 'Helvetica Neue', Arial, system-ui, sans-serif;
   --mono:'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --r:18px;
+  --sos-top:transparent;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
   --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
   --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
-  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; color-scheme:dark } }
+  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; --sos-top:color-mix(in srgb, var(--surface) 80%, transparent); color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#08120F; --surface:#101D19; --surface-2:#172823; --ink:#E4EEEA; --muted:#93A8A1; --line:#22352F;
   --accent:#4CC7A6; --accent-soft:#143A31; --on-accent:#04201A;
   --sos:#FF7559; --sos-soft:#3D1A13; --on-sos:#2A0B05;
-  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; color-scheme:dark }
+  --gold:#E6C25A; --gold-soft:#3A2F10; --hero:#0F4A3D; --on-hero:#E6F5EF; --sos-top:color-mix(in srgb, var(--surface) 80%, transparent); color-scheme:dark }
 
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -122,9 +123,9 @@ a{color:var(--accent)}
 .breath{display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 18px}
 .breath{position:relative; overflow:hidden; isolation:isolate}
 .breath::before{content:""; position:absolute; inset:0 0 auto 0; height:72%; z-index:-1; background:url('../img/portada-pareja-900.webp') center 18% / cover no-repeat}
-.breath::after{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, transparent) 0%, transparent 17%, transparent 30%, color-mix(in srgb, var(--surface) 55%, transparent) 50%, var(--surface) 68%)}
+.breath::after{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, var(--sos-top) 0%, transparent 17%, transparent 30%, color-mix(in srgb, var(--surface) 55%, transparent) 50%, var(--surface) 68%)}
 .lung{position:relative; width:min(72vw, 260px); aspect-ratio:1; max-width:100%; display:grid; place-items:center}
-.lung .halo{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)}
+.lung .halo{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--accent-soft) 45%, transparent) 0%, transparent 65%)}
 .lung .core{width:58%; aspect-ratio:1; border-radius:50%; background:var(--accent); transform:scale(.6); transition:transform 4s cubic-bezier(.45,0,.3,1); display:grid; place-items:center; color:var(--on-accent); font-family:var(--display); font-weight:700; font-size:1.1rem; text-align:center; padding:10px}
 .phase{font-family:var(--display); font-size:1.6rem; font-weight:700}
 .countdown{font-family:var(--mono); font-size:2.4rem; letter-spacing:.02em}
