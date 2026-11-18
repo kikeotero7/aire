@@ -48,7 +48,7 @@ Pruébala 7 días gratis con todo incluido. Después, desbloquéala para siempre
 
 Aire no es un producto sanitario ni sustituye el consejo de un profesional de la salud. Si fumas mucho o tienes ansiedad intensa, habla con tu médico: existen tratamientos que aumentan mucho las probabilidades de éxito.
 
-Una app de KREA Digital Studio.
+Una app de KREAVANCE.
 
 **Categoría:** Salud y bienestar · **Etiquetas:** dejar de fumar, hábitos, bienestar
 **Sitio web:** https://aire.kreadigitalstudio.es
