@@ -1,7 +1,7 @@
 # Aire · notas del proyecto (léelas al empezar cada sesión)
 
 ## Qué es
-App para dejar de fumar de KREA Digital Studio. Dos piezas en el mismo dominio:
+App para dejar de fumar de KREAVANCE. Dos piezas en el mismo dominio:
 - **Web de venta** → `aire.kreadigitalstudio.es` (fuente: `landing.html`)
 - **App (PWA instalable)** → `aire.kreadigitalstudio.es/app/` (fuente: `app.html`)
 - **Textos legales** → `aire.kreadigitalstudio.es/legal/` (fuente: `legal.html`)
@@ -39,7 +39,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 - [x] Subir el proyecto, activar GitHub Pages con dominio `aire.kreadigitalstudio.es`.
 - [x] Crear el CNAME en OVHcloud (web y app ya cargan en aire.kreadigitalstudio.es).
 - [ ] Activar "Aplicar HTTPS" en GitHub → Configuración → Páginas.
-- [ ] **Bloqueado hasta que Kike se dé de alta (autónomo o sociedad, KREA Digital Studio):** datos legales, Lemon Squeezy y Cloudflare. No cobrar antes del alta.
+- [ ] **Bloqueado hasta que Kike se dé de alta (autónomo o sociedad, KREAVANCE):** datos legales, Lemon Squeezy y Cloudflare. No cobrar antes del alta.
 - [ ] Rellenar los datos del titular en `legal.html` (marcados en amarillo: nombre/razón social, NIF, dirección, email).
 - [ ] Revisión de los textos legales por la gestoría.
 - [ ] Lemon Squeezy: tienda, producto Aire Pro 9,99 €, licencias (3 activaciones), descuento LANZAMIENTO.
