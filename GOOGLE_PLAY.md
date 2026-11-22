@@ -10,7 +10,7 @@
 1. Entra en https://play.google.com/console con tu Gmail y elige **Cuenta personal**.
 2. Paga los 25 $ (una sola vez) y verifica tu identidad con el DNI y un teléfono.
    Google mostrará en la ficha tu nombre y, cuando cobres, la dirección de contacto que indiques.
-3. Correo de contacto para la ficha: usa `hola@kreadigitalstudio.es` cuando exista.
+3. Correo de contacto para la ficha: usa `contacto@kreavance.es` cuando exista.
 
 ## 2. Crear el paquete Android (Kike en el navegador, 5 minutos)
 1. Entra en https://www.pwabuilder.com e introduce `https://aire.kreadigitalstudio.es/app/`.
