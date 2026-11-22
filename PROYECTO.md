@@ -32,7 +32,7 @@ Se edita siempre la fuente y se ejecuta `./build.sh`, que genera `index.html`, `
 2. En **OVHcloud** se crea el registro DNS: Web Cloud → Nombres de dominio → kreadigitalstudio.es →
    pestaña **Zona DNS** → **Añadir un registro** → **CNAME** → subdominio `aire`, destino `kikeotero7.github.io.` (con punto final).
    La propagación suele tardar de minutos a unas horas (máximo 24 h).
-3. El alojamiento de **HostGator** queda como **plan B** (subir los archivos por FTP) y para el correo `hola@kreadigitalstudio.es`.
+3. El alojamiento de **HostGator** queda como **plan B** (subir los archivos por FTP) y para el correo `contacto@kreavance.es`.
 
 ## Pendiente
 - [x] Kike crea el repositorio vacío `aire` en GitHub (público) y da acceso a Claude.
